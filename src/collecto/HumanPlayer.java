@@ -10,33 +10,29 @@ public class HumanPlayer extends Player {
 	
 	//@Override
 	public String determineMove(Board board) {
-		String prompt = "> " + getName() + ", what is your choice? ";
-        System.out.println(prompt);
-
-        String moveStr = TextIO.getlnWord();
-        String[] moveArr = moveStr.split("~");
-        
+        String moveStr = null;
+        String[] moveArr;
         boolean valid = false;
-
-        if (moveArr.length == 1) {
-        	valid = board.isValidSingleMove(Integer.parseInt(moveArr[0]));
-        } else if (moveArr.length == 2) {
-        	valid = board.isValidDoubleMove(Integer.parseInt(moveArr[0]), 
-        			Integer.parseInt(moveArr[1]));
-        }
-
+        
         while (!valid) {
-        	System.out.println("ERROR: " + moveStr + " is not a valid move.");
+        	String prompt = "> " + getName() + ", what is your choice? ";
             System.out.println(prompt);
+            
             moveStr = TextIO.getln();
             moveArr = moveStr.split("~");
+
             if (moveArr.length == 1) {
             	valid = board.isValidSingleMove(Integer.parseInt(moveArr[0]));
             } else if (moveArr.length == 2) {
-            	valid = board.isValidDoubleMove(Integer.parseInt(moveArr[0]), 
-            			Integer.parseInt(moveArr[1]));
+            	valid = board.isValidDoubleMove(Integer.parseInt(moveArr[0]), Integer.parseInt(moveArr[1]));
+            }
+
+            if (!valid) {
+                prompt = "ERROR: " + moveStr + " is not a valid move.";
+                System.out.println(prompt);
             }
         }
+
         return moveStr;
 	}
 

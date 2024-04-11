@@ -17,11 +17,6 @@ public class SmartStrategy implements Strategy {
 	public String getName() {
 		return "Smart";
 	}
-
-	/**
-	 * AI player
-	 * @param name the name of the AI player
-	 */
 	
 	/**
 	 * determine a best move comparing with the predictive result of the opponent.
@@ -37,25 +32,25 @@ public class SmartStrategy implements Strategy {
 		int moreThan6 = 0;
 		int oppIncScore = 0;
 		
-		Map<Colors, Integer> curBallMap;
+		HashMap<Colors, Integer> curColorMap;
 
 		for (String m : possibleMoves.keySet()) {
 			int total = 0;
 			int mt6 = 0;
 
-			curBallMap = new HashMap<>(player.getBallMap());
+			curColorMap = new HashMap<>(player.getColorMap());
 			for (Colors color : possibleMoves.get(m).keySet()) {
 				int amount = possibleMoves.get(m).get(color);
 				total += amount;
-	    		int current = curBallMap.getOrDefault(color, 0);
+	    		int current = curColorMap.getOrDefault(color, 0);
 	    		if (current == 6 && current + amount == 8) {
 	    			mt6++;
 	    		}
-	    		curBallMap.put(color, current + amount);
+	    		curColorMap.put(color, current + amount);
 	    	}
 
 			int score = 0;
-			for (Integer val : curBallMap.values()) {
+			for (Integer val : curColorMap.values()) {
 	    		score += val / 3;
 	    	}
 			
@@ -99,27 +94,27 @@ public class SmartStrategy implements Strategy {
 			scoreInfo.put("totalBall", 0);
 			scoreInfo.put("moreThan6", 0);
 		} else {
-			Map<Colors, Integer> oppBallMap = this.getOppBallMap(board);
+			Map<Colors, Integer> oppColorMap = this.getOppColorMap(board);
 			int totalBall = 0;
-			int curScore = this.calScore(oppBallMap);
+			int curScore = this.calScore(oppColorMap);
 			int moreThan6 = 0;
 			int increasedScores = 0;
-			Map<Colors, Integer> curBallMap;
+			Map<Colors, Integer> curColorMap;
 			for (String key : oppPossibleMoves.keySet()) {
 				int total = 0;
 				int mt6 = 0;
-				curBallMap = new HashMap<>(oppBallMap);
+				curColorMap = new HashMap<>(oppColorMap);
 				for (Colors color : oppPossibleMoves.get(key).keySet()) {
 					int amount = oppPossibleMoves.get(key).get(color);
 					total += amount;
-		    		int current = curBallMap.getOrDefault(color, 0);
+		    		int current = curColorMap.getOrDefault(color, 0);
 		    		if (current == 6 && current + amount == 8) {
 		    			mt6++;
 		    		}
-		    		curBallMap.put(color, current + amount);
+		    		curColorMap.put(color, current + amount);
 		    	}
 				int score = 0;
-				for (Integer val : curBallMap.values()) {
+				for (Integer val : curColorMap.values()) {
 		    		score += val / 3;
 		    	}
 				
@@ -141,7 +136,7 @@ public class SmartStrategy implements Strategy {
 	}
 	
 	/**
-	 * Assume after AI moves, predict how moves the opponent can get.
+	 * Assume after AI moves, predict how many moves the opponent can get.
 	 * @param board
 	 * @param move
 	 * @return a hash map containing all possible moves and the possible result
@@ -164,44 +159,44 @@ public class SmartStrategy implements Strategy {
 	 * @param board
 	 * @return a map 
 	 */
-	private Map<Colors, Integer> getOppBallMap(Board board) {
+	private Map<Colors, Integer> getOppColorMap(Board board) {
 		
-		Map<Colors, Integer> oppBallMap = new HashMap<>();
-		Map<Colors, Integer> curBallMap = new HashMap<Colors, Integer>(player.getBallMap());
+		Map<Colors, Integer> oppColorMap = new HashMap<>();
+		Map<Colors, Integer> curColorMap = new HashMap<Colors, Integer>(player.getColorMap());
 		Colors[][] fields = board.getFields();
 
 		for (int i = 0; i < Board.DIM; i++) {
 			for (int j = 0; j < Board.DIM; j++) {
 				Colors color = fields[i][j];
 				if (color != Colors.EMPTY) {
-					int current = curBallMap.getOrDefault(fields[i][j], 0);
-		    		curBallMap.put(color, current + 1);
+					int current = curColorMap.getOrDefault(fields[i][j], 0);
+		    		curColorMap.put(color, current + 1);
 				}
 			}
 		}
 
 		for (Colors color : Colors.values()) {
 			if (color != Colors.EMPTY) {
-				int current = curBallMap.getOrDefault(color, 0);
+				int current = curColorMap.getOrDefault(color, 0);
 				if (Board.EACH - current > 0) {
-					oppBallMap.put(color, Board.EACH - current);
+					oppColorMap.put(color, Board.EACH - current);
 				}
 			}
 		}
 
-		return oppBallMap;
+		return oppColorMap;
 		
 	}
 	
 	/**
 	 * Calculate the score, get 1 point for every 3 balls of each color.
-	 * @param ballMap
+	 * @param colorMap
 	 * @return the score
 	 */
-	private int calScore(Map<Colors, Integer> ballMap) {
+	private int calScore(Map<Colors, Integer> colorMap) {
 		int score = 0;
 
-    	for (Integer val : ballMap.values()) {
+    	for (Integer val : colorMap.values()) {
     		score += val / 3;
     	}
 

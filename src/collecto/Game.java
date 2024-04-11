@@ -73,16 +73,20 @@ public class Game {
     private void play() {
     	while (!board.gameOver()) {
     		update();
+
 	    	String moveStr = players[current].determineMove(board);
 	    	String[] moveArr = moveStr.split("~");
+
 	        if (moveArr.length == 1) {
-	        	players[current].addBall(board.setMove(Integer.parseInt(moveArr[0])));
+	        	players[current].setColorMap(board.setMove(Integer.parseInt(moveArr[0])));
 	        } else if (moveArr.length == 2) {
 	        	board.moveBalls(Integer.parseInt(moveArr[0]));
-	        	players[current].addBall(board.setMove(Integer.parseInt(moveArr[1])));
+	        	players[current].setColorMap(board.setMove(Integer.parseInt(moveArr[1])));
 	        }
+
 	    	current = current == 0 ? 1 : 0;
     	}
+
     	update();
     	printResult();
     }
@@ -93,9 +97,9 @@ public class Game {
     private void update() {
         System.out.println("\nCurrent game situation:");
     	System.out.printf("%s has %d point(s). %s\n", players[0].getName(), 
-    			players[0].getScore(), players[0].getBallMap());
+    		players[0].getScore(), players[0].getColorMap());
     	System.out.printf("%s has %d point(s). %s\n\n", players[1].getName(), 
-    			players[1].getScore(), players[1].getBallMap());
+    		players[1].getScore(), players[1].getColorMap());
     	System.out.println(board.toString());
     }
 
@@ -106,10 +110,10 @@ public class Game {
     private void printResult() {
     	if (players[0].getScore() > players[1].getScore()) {
     		System.out.printf("%s is the winner. The score is %d.\n", players[0]
-    				.getName(), players[0].getScore());
+    			.getName(), players[0].getScore());
     	} else if (players[0].getScore() < players[1].getScore()) {
     		System.out.printf("%s is the winner. The score is %d.\n", players[1]
-    				.getName(), players[1].getScore());
+    			.getName(), players[1].getScore());
     	} else {
     		System.out.printf("Draw. Got the same score %d\n", players[0].getScore());
     	}

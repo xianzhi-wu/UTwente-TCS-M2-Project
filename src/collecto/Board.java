@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import utils.Colors;
@@ -169,9 +168,9 @@ public class Board {
      * @param move The move direction: 0 for left, 1 for right, 2 for top, 3 for bottom.
 	 * @return a Map of the colors of the adjacent balls that are the same and their corresponding number.
 	 */
-    public Map<Colors, Integer> setMove(int move) {
+    public HashMap<Colors, Integer> setMove(int move) {
 		// Map to store the colors and the number of adjacent balls of the same color removed
-    	Map<Colors, Integer> ballMap = new HashMap<>();
+    	HashMap<Colors, Integer> colorMap = new HashMap<>();
 
 		// Move the balls and return the index of the first EMPTY field indicating that you can move the balls in that direction
     	int firstEMPTYIndex = this.moveBalls(move);
@@ -224,7 +223,7 @@ public class Board {
 	    					if (sameColor > 0) {
 	    						if (!kept) {
 	    							sameColor++;
-	    	    					ballMap.put(this.fields[line][i], ballMap.getOrDefault(this.fields[line][i], 0) + sameColor);
+	    	    					colorMap.put(this.fields[line][i], colorMap.getOrDefault(this.fields[line][i], 0) + sameColor);
 	    	    					sameColor = 0; // reset sameColor for the next matched color
 	    	    				}
 	    						this.fields[line][i] = Colors.EMPTY; // Set the current field to EMPTY
@@ -267,7 +266,7 @@ public class Board {
 	    					if (sameColor > 0) {
 	    						if (!kept) {
 	    							sameColor++;
-									ballMap.put(this.fields[line][i], ballMap.getOrDefault(this.fields[line][i], 0) + sameColor);
+									colorMap.put(this.fields[line][i], colorMap.getOrDefault(this.fields[line][i], 0) + sameColor);
 	    	    					sameColor = 0;
 	    	    				}
 	    						this.fields[line][i] = Colors.EMPTY;
@@ -310,7 +309,7 @@ public class Board {
 	    					if (sameColor > 0) {
 	    						if (!kept) {
 	    							sameColor++;
-									ballMap.put(this.fields[i][line], ballMap.getOrDefault(this.fields[i][line], 0) + sameColor);
+									colorMap.put(this.fields[i][line], colorMap.getOrDefault(this.fields[i][line], 0) + sameColor);
 	    	    					sameColor = 0;
 	    	    				}
 	    						this.fields[i][line] = Colors.EMPTY;
@@ -353,7 +352,7 @@ public class Board {
 	    					if (sameColor > 0) {
 	    						if (!kept) {
 	    							sameColor++;
-									ballMap.put(this.fields[i][line], ballMap.getOrDefault(this.fields[i][line], 0) + sameColor);
+									colorMap.put(this.fields[i][line], colorMap.getOrDefault(this.fields[i][line], 0) + sameColor);
 	    	    					sameColor = 0;
 	    	    				}
 	    						this.fields[i][line] = Colors.EMPTY;
@@ -366,7 +365,7 @@ public class Board {
 	    	}
     	}
 
-    	return ballMap;
+    	return colorMap;
     }
     
     /**
@@ -508,7 +507,7 @@ public class Board {
 	 * @requires MINMOVE <= move1 && move1 <= MAXMOVE
 	 * * @requires MINMOVE <= move2 && move2 <= MAXMOVE
 	 * @param move1 the first move must be invalid
-	 * @param move2 the second
+	 * @param move2 the second move
 	 * @return the validity of the double move
 	 */
 	public boolean isValidDoubleMove(int move1, int move2) {
@@ -520,6 +519,7 @@ public class Board {
 
 		Board boardCopy = this.deepCopy();
 		boardCopy.moveBalls(move1);
+
 		return boardCopy.isValidSingleMove(move2);
     }
 	

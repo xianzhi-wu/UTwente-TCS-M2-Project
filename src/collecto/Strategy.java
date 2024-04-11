@@ -11,7 +11,7 @@ public interface Strategy {
 	public String determineMove(Board board);
 	
 	/**
-	 * Get all the possible Moves.
+	 * Get all the possible Moves
 	 * @param board
 	 * @return
 	 */
@@ -26,7 +26,7 @@ public interface Strategy {
 			} else {
 				continue;
 			}
-		} 
+		}
 	
 		if (possibleMoves.isEmpty()) {
 			for (int i = Board.MINMOVE; i <= Board.MAXMOVE; i++) {
