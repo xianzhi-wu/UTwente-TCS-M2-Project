@@ -48,7 +48,7 @@ public class Game {
         while (continueGame) {
             reset();
             play();
-            System.out.println("\n> Play another time? (y/n)?");
+            System.out.println("\n> Play again? (y/n)");
             continueGame = TextIO.getBoolean();
         }
     }

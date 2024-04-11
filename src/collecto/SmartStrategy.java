@@ -17,6 +17,7 @@ public class SmartStrategy implements Strategy {
 	public String getName() {
 		return "Smart";
 	}
+
 	/**
 	 * AI player
 	 * @param name the name of the AI player
@@ -37,9 +38,11 @@ public class SmartStrategy implements Strategy {
 		int oppIncScore = 0;
 		
 		Map<Colors, Integer> curBallMap;
+
 		for (String m : possibleMoves.keySet()) {
 			int total = 0;
 			int mt6 = 0;
+
 			curBallMap = new HashMap<>(player.getBallMap());
 			for (Colors color : possibleMoves.get(m).keySet()) {
 				int amount = possibleMoves.get(m).get(color);
@@ -50,12 +53,14 @@ public class SmartStrategy implements Strategy {
 	    		}
 	    		curBallMap.put(color, current + amount);
 	    	}
+
 			int score = 0;
 			for (Integer val : curBallMap.values()) {
 	    		score += val / 3;
 	    	}
 			
 			Map<String, Integer> oppScoreInfo = this.getOppScoreInfo(board, m);
+			
 			if (totalBall == 0 
 					|| total > totalBall && score > curScore && oppScoreInfo.get("incScores") == 0
 					|| total > totalBall && score == curScore && oppScoreInfo.get("incScores") == 0
@@ -75,6 +80,7 @@ public class SmartStrategy implements Strategy {
 			    oppIncScore = oppScoreInfo.get("incScores");
 			}
 		}
+
 		return move;
 		
 	}
@@ -87,6 +93,7 @@ public class SmartStrategy implements Strategy {
 		//Board boardCopy = board.deepCopy();
 		Map<String, Map<Colors, Integer>> oppPossibleMoves = this.predictMovesForOpp(board, move);
 		Map<String, Integer> scoreInfo = new HashMap<>();
+
 		if (oppPossibleMoves.isEmpty()) {
 			scoreInfo.put("incScores", 0);
 			scoreInfo.put("totalBall", 0);
@@ -129,6 +136,7 @@ public class SmartStrategy implements Strategy {
 				}
 			}
 		}
+
 		return scoreInfo;
 	}
 	
@@ -161,6 +169,7 @@ public class SmartStrategy implements Strategy {
 		Map<Colors, Integer> oppBallMap = new HashMap<>();
 		Map<Colors, Integer> curBallMap = new HashMap<Colors, Integer>(player.getBallMap());
 		Colors[][] fields = board.getFields();
+
 		for (int i = 0; i < Board.DIM; i++) {
 			for (int j = 0; j < Board.DIM; j++) {
 				Colors color = fields[i][j];
@@ -170,6 +179,7 @@ public class SmartStrategy implements Strategy {
 				}
 			}
 		}
+
 		for (Colors color : Colors.values()) {
 			if (color != Colors.EMPTY) {
 				int current = curBallMap.getOrDefault(color, 0);
@@ -178,6 +188,7 @@ public class SmartStrategy implements Strategy {
 				}
 			}
 		}
+
 		return oppBallMap;
 		
 	}
@@ -189,9 +200,11 @@ public class SmartStrategy implements Strategy {
 	 */
 	private int calScore(Map<Colors, Integer> ballMap) {
 		int score = 0;
+
     	for (Integer val : ballMap.values()) {
     		score += val / 3;
     	}
+
     	return score;
 	}
 

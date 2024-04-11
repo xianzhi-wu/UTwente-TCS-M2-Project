@@ -353,6 +353,14 @@ public class CollectoClient {
 				col = (i - 1) % Board.DIM;
 			fields[row][col] = Colors.values()[Integer.parseInt(gameStr[i])];
 		}
+		// Loop through the array and print each element
+        for (int i = 0; i < Board.DIM; i++) {
+            for (int j = 0; j < Board.DIM; j++) {
+                System.out.print(fields[i][j] + " ");
+            }
+            System.out.println(); // Move to the next line after each row
+        }
+
 		board = new Board(fields);
 		state = States.PLAYING;
 		System.out.println(board.toString());

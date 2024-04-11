@@ -82,7 +82,7 @@ public class CollectoServer implements Runnable {
 				view.showMessage("Attempting to open a socket on port " 
 						+ port + "...");
 				ssock = new ServerSocket(port);
-				view.showMessage("Server started on port " + port);
+				view.showMessage("Server started on " + ssock.getInetAddress() + " and port " + port);
 			} catch (Exception e) {
 				e.printStackTrace();
 				view.showMessage("ERROR: could not create a socket on port " + port + ".");

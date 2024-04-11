@@ -26,6 +26,8 @@ public class Board {
     }
 	
 	public Board(Colors[][] fields) {
+		// Initialize fields array
+		this.fields = new Colors[DIM][DIM]; 
 		for (var i = 0; i < DIM; i++) {
     		for (var j = 0; j < DIM; j++) {
     			this.fields[i][j] = fields[i][j];

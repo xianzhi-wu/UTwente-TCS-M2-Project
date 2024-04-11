@@ -50,6 +50,7 @@ public class GameRoom {
     	if (players[current].equals(player)) {
 	    	String[] moveArr = move.split("~");
 	    	boolean validMove = true;
+
 	        if (moveArr.length == 1) {
 	        	int m = board.convertMoveStr(moveArr[0]);
 	        	if (board.isValidSingleMove(m)) {
@@ -67,6 +68,7 @@ public class GameRoom {
 	        		validMove = false;
 	        	}
 	        }
+
 	        if (validMove) {
 		        players[0].sendMessage(Protocols.MOVE + Protocols.TILDE + move);
 		        players[1].sendMessage(Protocols.MOVE + Protocols.TILDE + move);
@@ -109,6 +111,7 @@ public class GameRoom {
 		String res;
 		int score01 = players[0].getScore();
 		int score02 = players[1].getScore();
+
 		if (score01 > score02) {
 			res = Protocols.GAMEOVER + Protocols.TILDE + Protocols.VICTORY 
 					+ Protocols.TILDE + players[0].getName();
@@ -118,6 +121,7 @@ public class GameRoom {
 		} else {
 			res = Protocols.GAMEOVER + Protocols.TILDE + Protocols.DRAW;
 		}
+		
 		return res;
 	}
 	

@@ -18,6 +18,7 @@ public interface Strategy {
 	default Map<String, Map<Colors, Integer>> getPossibleMoves(Board board) {
 		Board boardCopy;
 		Map<String, Map<Colors, Integer>> possibleMoves = new HashMap<>();
+		
 		for (int i = Board.MINMOVE; i <= Board.MAXMOVE; i++) {
 			if (board.isValidSingleMove(i)) {
 				boardCopy = board.deepCopy();

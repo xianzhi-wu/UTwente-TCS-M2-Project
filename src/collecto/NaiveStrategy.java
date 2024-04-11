@@ -20,6 +20,7 @@ public class NaiveStrategy implements Strategy {
 		Map<String, Map<Colors, Integer>> possibleMoves = this.getPossibleMoves(board);
 		String move = "-1";
 		int totalBall = 0;
+
 		for (String m : possibleMoves.keySet()) {
 			int total = 0;
 			for (Colors color : possibleMoves.get(m).keySet()) {
@@ -31,6 +32,7 @@ public class NaiveStrategy implements Strategy {
 				totalBall = total;
 			}
 		}
+		
 		return move;
 	}
 
