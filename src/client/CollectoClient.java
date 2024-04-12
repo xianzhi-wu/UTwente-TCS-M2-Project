@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -14,8 +15,10 @@ import collecto.HumanPlayer;
 import collecto.NaiveStrategy;
 import collecto.Player;
 import collecto.SmartStrategy;
+
 import exceptions.ProtocolException;
 import exceptions.ServerUnavailableException;
+
 import utils.Colors;
 import utils.Protocols;
 import utils.States;
@@ -26,7 +29,6 @@ public class CollectoClient {
 	private BufferedReader in;
 	private BufferedWriter out;
 	
-	private CollectoClientTUI view;
 	private Player player;
 	private int playerType;
 	private Player opponent;
@@ -42,7 +44,6 @@ public class CollectoClient {
 	 * Constructs a new CollectClient and initializes the view.
 	 */
 	public CollectoClient() {
-		view = new CollectoClientTUI(this);
 		//board = new Board();
 	}
 	
@@ -77,36 +78,25 @@ public class CollectoClient {
 		this.host = host;
 		this.port = port;
 	}
-	/**
-	 * Starts a new CollectoClient by creating a connection.
-	 * @throws ProtocolException 
-	 * @throws ServerUnavailableException 
-	 */
-	public void start() throws ProtocolException, ServerUnavailableException {
-		view.setUp();
-		createConnection();
-		view.start();
-	}
 
 	/**
 	 * Creates a connection to the server.
 	 * @ensures serverSock contains a valid socket connection to a server
 	 */
-	public void createConnection() {
+	public boolean createConnection() {
 		clearConnection();
-		while (serverSock == null) {
-			// try to open a Socket to the server
-			try {
-				InetAddress addr = InetAddress.getByName(host);
-				serverSock = new Socket(addr, port);
-				System.out.println("Connected to " + addr + ":" + port);
-				in = new BufferedReader(new InputStreamReader(serverSock.getInputStream()));
-				out = new BufferedWriter(new OutputStreamWriter(serverSock.getOutputStream()));
-			} catch (Exception e) {
-				System.out.println("ERROR: could not create a socket on "
-						+ host + " and port " + port + ".");
-				view.setUp();
-			}
+		// try to open a Socket to the server
+		try {
+			InetAddress addr = InetAddress.getByName(host);
+			serverSock = new Socket(addr, port);
+			System.out.println("Connected to " + addr + ":" + port);
+			in = new BufferedReader(new InputStreamReader(serverSock.getInputStream()));
+			out = new BufferedWriter(new OutputStreamWriter(serverSock.getOutputStream()));
+			return true;
+		} catch (Exception e) {
+			System.out.println("ERROR: could not create a socket on "
+					+ host + " and port " + port + ".");
+			return false;
 		}
 	}
 
@@ -388,8 +378,4 @@ public class CollectoClient {
 		}
 	}
 	
-	public static void main(String[] args) throws ServerUnavailableException, ProtocolException {
-		CollectoClient client = new CollectoClient();
-		client.start();
-	}
 }

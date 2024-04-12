@@ -5,7 +5,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+
 import java.net.Socket;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,11 +15,12 @@ import java.util.List;
 import collecto.Board;
 import collecto.NaiveStrategy;
 import collecto.Player;
+
 import utils.Protocols;
 import utils.States;
 
 public class CollectoClientHandler extends Player 
-				implements Runnable, Comparable<CollectoClientHandler> {
+	implements Runnable, Comparable<CollectoClientHandler> {
 
 	private BufferedReader in;
 	private BufferedWriter out;
@@ -44,19 +47,18 @@ public class CollectoClientHandler extends Player
 	@Override
 	public void run() {
 		String msg;
+
 		try {
 			msg = in.readLine();
+			
 			while (msg != null && !msg.equals(Protocols.QUIT)) {
 				handleCommand(msg);
 				msg = in.readLine();
 			}
+
 			shutdown();
 		} catch (IOException e) {
-			try {
-				shutdown();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			// shutdown();
 		}
 	}
 
@@ -152,7 +154,7 @@ public class CollectoClientHandler extends Player
 			out.close();
 			sock.close();
 			System.out.println("Player " + this.getName() + " disconnected");
-			//sendMessage(Protocols.QUIT);
+
 			server.removeClient(this);
 			if (state.equals(States.PLAYING)) {
 				gameRoom.removePlayer(this);
@@ -160,7 +162,6 @@ public class CollectoClientHandler extends Player
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	/**

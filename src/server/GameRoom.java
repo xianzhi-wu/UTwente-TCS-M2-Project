@@ -54,7 +54,7 @@ public class GameRoom {
 	        if (moveArr.length == 1) {
 	        	int m = board.convertMoveStr(moveArr[0]);
 	        	if (board.isValidSingleMove(m)) {
-	        		players[current].addBall(board.setMove(m));
+	        		players[current].setColorMap(board.setMove(m));
 	        	} else {
 	        		validMove = false;
 	        	}
@@ -63,7 +63,7 @@ public class GameRoom {
 	        	int m2 = board.convertMoveStr(moveArr[1]);
 	        	if (board.isValidDoubleMove(m1, m2)) {
 	        		board.moveBalls(m1);
-	        		players[current].addBall(board.setMove(m2));
+	        		players[current].setColorMap(board.setMove(m2));
 	        	} else {
 	        		validMove = false;
 	        	}

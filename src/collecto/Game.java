@@ -22,20 +22,20 @@ public class Game {
      * Index of the current player.
      * @invariant the index is always between 0 and NUMBER_PLAYERS
      */
-    private int current;
+    private int current = 0;
 
     /**
      * Creates a new Game object.
-     * @requires s0 and s1 to be non-null
-     * @param s0 the first player
-     * @param s1 the second player
+     * @requires p0 and p1 to be non-null
+     * @param p0 the first player
+     * @param p1 the second player
      */
-    public Game(Player s0, Player s1) {
+    public Game(Player p0, Player p1) {
         board = new Board();
         players = new Player[NUMBER_PLAYERS];
-        players[0] = s0;
-        players[1] = s1;
-        current = 0;
+        players[0] = p0;
+        players[1] = p1;
+        // current = 0;
     }
 
     /**
@@ -46,10 +46,10 @@ public class Game {
     public void start() {
         boolean continueGame = true;
         while (continueGame) {
-            reset();
             play();
             System.out.println("\n> Play again? (y/n)");
             continueGame = TextIO.getBoolean();
+            reset();
         }
     }
 

@@ -2,11 +2,12 @@ package client;
 
 import collecto.Board;
 import collecto.ComputerPlayer;
-//import collecto.HumanPlayer;
 import collecto.NaiveStrategy;
 import collecto.Player;
+
 import exceptions.ProtocolException;
 import exceptions.ServerUnavailableException;
+
 import utils.Protocols;
 import utils.States;
 import utils.TextIO;
@@ -18,8 +19,8 @@ public class CollectoClientTUI {
 	private Player player;
 	private Board board;
 	
-	public CollectoClientTUI(CollectoClient client) {
-		this.client = client;
+	public CollectoClientTUI() {
+		this.client = new CollectoClient();
 	}
 	
 	/**
@@ -33,6 +34,7 @@ public class CollectoClientTUI {
 							"1, AI player 01(Smart)\n" + 
 							"2, AI player 02(Naive)\n" +
 							"3, Human player\n");
+							
 		System.out.print("Your option: ");
 		
 		int type = TextIO.getlnInt();
@@ -64,8 +66,6 @@ public class CollectoClientTUI {
 						input = "MOVE~" + move;
 						System.out.println(player.getName() + "(" + ((ComputerPlayer) player).getStrategy().getName() + ")" + ": " + input);
 					} else {
-						//client.resetGame();
-						//System.out.println(client.readLineFromServer());
 						continue;
 					}
 				} else {
@@ -90,11 +90,17 @@ public class CollectoClientTUI {
 	public void setUp() {
 		System.out.print("Input server address for client: ");
 		String host = TextIO.getlnString();
+
 		System.out.print("Input a port for client: ");
 		int port = TextIO.getlnInt();
+
 		client.setUp(host, port);
 	}
 	
+	public boolean createConnection() {
+		return client.createConnection();
+	}
+
 	/**
 	 * handle the user input.
 	 * @param input
@@ -204,5 +210,15 @@ public class CollectoClientTUI {
 				"- RANK\n" +
 				"- HINT\n" +
 				"- MOVE~<first push>[~second push]\n");
+	}
+
+	public static void main(String[] args) throws ServerUnavailableException, ProtocolException {
+		CollectoClientTUI clientTUI = new CollectoClientTUI();
+		clientTUI.setUp();
+		if (clientTUI.createConnection()) {
+			clientTUI.start();
+		} else {
+			System.out.println("Failed to connect to server");
+		}
 	}
 }

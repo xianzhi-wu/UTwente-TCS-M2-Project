@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,17 +18,13 @@ public class CollectoServer implements Runnable {
 	/* List of CollectoClientHandler, one for each connected client */
 	private List<CollectoClientHandler> clients;
 	
-	/* The view of this CollectoServer */
-	private CollectoServerTUI view;
-	
 	/* List of CollectoClientHandler in queue */
 	private List<CollectoClientHandler> clientsInQueue;
 
 	/**
-	 * Constructs a new CollectoServer. Initializes the clients list, the view 
+	 * Constructs a new CollectoServer. Initializes the clients list
 	 */
 	public CollectoServer() {
-		view = new CollectoServerTUI(this);
 		clients = new ArrayList<>();
 		clientsInQueue = new ArrayList<>();
 	}
@@ -39,7 +36,6 @@ public class CollectoServer implements Runnable {
 	 * If {@link #setup()} throws a ExitProgram exception, stop the program. 
 	 */
 	public void run() {
-		view.start();
 		boolean openNewSocket = true;
 		while (openNewSocket) {
 			try {
@@ -79,14 +75,12 @@ public class CollectoServer implements Runnable {
 		while (ssock == null) {
 			// try to open a new ServerSocket
 			try {
-				view.showMessage("Attempting to open a socket on port " 
+				System.out.println("Attempting to open a socket on port " 
 						+ port + "...");
 				ssock = new ServerSocket(port);
-				view.showMessage("Server started on " + ssock.getInetAddress() + " and port " + port);
+				System.out.println("Server started on " + ssock.getInetAddress() + " and port " + port);
 			} catch (Exception e) {
 				e.printStackTrace();
-				view.showMessage("ERROR: could not create a socket on port " + port + ".");
-				view.start();
 			}
 		}
 	}
@@ -102,12 +96,14 @@ public class CollectoServer implements Runnable {
 	
 	public boolean clientExists(String name) {
 		boolean res = false;
+		
 		for (CollectoClientHandler client : clients) {
 			if (client.getName().equals(name)) {
 				res = true;
 				break;
 			}
 		}
+
 		return res;
 	}
 	
@@ -155,12 +151,6 @@ public class CollectoServer implements Runnable {
 	
 	public List<CollectoClientHandler> getClientList() {
 		return clients;
-	}
-	
-	/* Start a new CollectoServer */
-	public static void main(String[] args) {
-		CollectoServer server = new CollectoServer();
-		server.run();
 	}
 	
 }
