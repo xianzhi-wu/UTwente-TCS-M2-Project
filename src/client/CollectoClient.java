@@ -34,46 +34,49 @@ public class CollectoClient {
 	private Player opponent;
 	private Board board;
 	
-	//private String name;
 	private States state = States.NEWIN;
 	
 	private String host;
 	private int port;
 	
 	/**
-	 * Constructs a new CollectClient and initializes the view.
+	 * Constructs a new CollectClient
 	 */
 	public CollectoClient() {
-		//board = new Board();
+
 	}
 	
 	public States getState() {
-		return state;
+		return this.state;
 	}
 	
 	public void resetGame() {
-		board = null;
-		opponent = null;
-		player.reset();
-		state = States.GAMEOVER;
+		this.board = null;
+		this.opponent = null;
+		this.player.reset();
+		this.state = States.GAMEOVER;
 	}
-	
+	/**
+	 * player type: 1 for AI player using smart strategy, 
+	 * 2 for AI player using naive strategy, 3 for human player
+	 */
 	public void setPlayerType(int type) {
-		playerType = type;
+		this.playerType = type;
 	}
 	
 	/**
-	 * Get the current player.
+	 * Get the current player
 	 * @return the player
 	 */
 	public Player getPlayer() {
-		return player;
+		return this.player;
 	}
 	
 	public Board getBoard() {
-		return board;
+		return this.board;
 	}
 	
+	// Set up the server address and port
 	public void setUp(String host, int port) {
 		this.host = host;
 		this.port = port;
@@ -88,14 +91,16 @@ public class CollectoClient {
 		// try to open a Socket to the server
 		try {
 			InetAddress addr = InetAddress.getByName(host);
-			serverSock = new Socket(addr, port);
+			this.serverSock = new Socket(addr, port);
 			System.out.println("Connected to " + addr + ":" + port);
-			in = new BufferedReader(new InputStreamReader(serverSock.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(serverSock.getOutputStream()));
+
+			this.in = new BufferedReader(new InputStreamReader(this.serverSock.getInputStream()));
+			this.out = new BufferedWriter(new OutputStreamWriter(this.serverSock.getOutputStream()));
+
 			return true;
 		} catch (Exception e) {
-			System.out.println("ERROR: could not create a socket on "
-					+ host + " and port " + port + ".");
+			System.out.println("ERROR: could not create a socket on " + this.host + " and port " + this.port + ".");
+
 			return false;
 		}
 	}
@@ -106,9 +111,9 @@ public class CollectoClient {
 	 * before calling this method!
 	 */
 	public void clearConnection() {
-		serverSock = null;
-		in = null;
-		out = null;
+		this.serverSock = null;
+		this.in = null;
+		this.out = null;
 	}
 
 	/**
@@ -118,11 +123,11 @@ public class CollectoClient {
 	 * @throws ServerUnavailableException if IO errors occur.
 	 */
 	public synchronized void sendMessage(String msg) throws ServerUnavailableException, ProtocolException {
-		if (out != null) {
+		if (this.out != null) {
 			try {
-				out.write(msg);
-				out.newLine();
-				out.flush();
+				this.out.write(msg);
+				this.out.newLine();
+				this.out.flush();
 			} catch (IOException e) {
 				System.out.println(e.getMessage());
 				throw new ServerUnavailableException("Could not write to server.");
@@ -138,10 +143,10 @@ public class CollectoClient {
 	 * @throws ServerUnavailableException if IO errors occur.
 	 */
 	public String readLineFromServer() throws ServerUnavailableException {
-		if (in != null) {
+		if (this.in != null) {
 			try {
 				// Read and return answer from Server
-				String answer = in.readLine();
+				String answer = this.in.readLine();
 				if (answer == null) {
 					throw new ServerUnavailableException("Could not read from server.");
 				}
@@ -163,13 +168,13 @@ public class CollectoClient {
 	 */
 	public String readMultipleLinesFromServer() 
 			throws ServerUnavailableException {
-		if (in != null) {
+		if (this.in != null) {
 			try {
 				// Read and return answer from Server
 				StringBuilder sb = new StringBuilder();
-				for (String line = in.readLine(); line != null
+				for (String line = this.in.readLine(); line != null
 						&& !line.equals(Protocols.EOT); 
-						line = in.readLine()) {
+						line = this.in.readLine()) {
 					sb.append(line + System.lineSeparator());
 				}
 				return sb.toString();
@@ -189,9 +194,9 @@ public class CollectoClient {
 	 */
 	public void closeConnection() {
 		try {
-			in.close();
-			out.close();
-			serverSock.close();
+			this.in.close();
+			this.out.close();
+			this.serverSock.close();
 			System.out.println("Quit!");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -205,11 +210,11 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void handleHello(String input) throws ServerUnavailableException, ProtocolException {
-		sendMessage(input);
-		String res = readLineFromServer();
+		this.sendMessage(input);
+		String res = this.readLineFromServer();
 		System.out.println("Server: " + res);
-		if (res.contains(Protocols.HELLO + Protocols.TILDE)) {
-			state = States.SAYHELLO;
+		if (res.equals(Protocols.HELLO + Protocols.TILDE + this.player.getName())) {
+			this.state = States.SAYHELLO;
 		}
 	}
 	
@@ -219,20 +224,18 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void handleLogin(String input) throws ServerUnavailableException, ProtocolException {
-		String[] inputArr = input.split(Protocols.TILDE);
-		if (playerType == 1 || playerType == 2) {
-			player = new ComputerPlayer(inputArr[1], playerType);
-			inputArr[1] = player.getName();
-			sendMessage(String.join(Protocols.TILDE, inputArr));
-		} else if (playerType == 3) {
-			player = new HumanPlayer(inputArr[1]);
-			sendMessage(input);
-		}
-		String res = readLineFromServer();
+		this.sendMessage(input);
+		String res = this.readLineFromServer();
 		if (res.equals(Protocols.LOGIN)) {
-			state = States.HANDSHANK;
+			String[] inputArr = input.split(Protocols.TILDE);
+			if (this.playerType == 1 || this.playerType == 2) {
+				this.player = new ComputerPlayer(inputArr[1], this.playerType);
+			} else if (this.playerType == 3) {
+				this.player = new HumanPlayer(inputArr[1]);
+			}
+			this.state = States.HANDSHANK;
 		} else {
-			player = null;
+			// this.player = null;
 			System.out.println("Server: " + res);
 		}
 	}
@@ -244,8 +247,8 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void handleList(String input) throws ServerUnavailableException, ProtocolException {
-		sendMessage(input);
-		System.out.println("Players List: " + readLineFromServer());
+		this.sendMessage(input);
+		System.out.println("Players List: " + this.readLineFromServer());
 	}
 	
 	/**
@@ -255,8 +258,8 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void handleRank(String input) throws ServerUnavailableException, ProtocolException {
-		sendMessage(input);
-		System.out.println(readMultipleLinesFromServer());
+		this.sendMessage(input);
+		System.out.println(this.readMultipleLinesFromServer());
 	}
 	
 	/**
@@ -266,17 +269,15 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void handleQueue(String input) throws ServerUnavailableException, ProtocolException {
-		sendMessage(input);
+		this.sendMessage(input);
 		//state = States.QUEUEING;
-		String res = readLineFromServer();
-		//if (res.length() > 0) {
+		String res = this.readLineFromServer();
 		if (res.contains(Protocols.NEWGAME)) {
 			System.out.println(res);
-			setBoard(res);
+			this.setBoard(res);
 		} else {
 			System.out.println("Server: " + res);
 		}
-		//}
 	}
 	
 	/**
@@ -285,25 +286,28 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void handleMove(String input) throws ServerUnavailableException, ProtocolException {
-		sendMessage(input);
-		String res = readLineFromServer();
+		this.sendMessage(input);
+		String res = this.readLineFromServer();
+
 		if (input.equals(res)) {
 			res = res.replace(Protocols.MOVE + Protocols.TILDE, "");
-			player.makeMove(board, res);
-			System.out.println(board.toString());
-			// Show move from the peer client
-			res = readLineFromServer();
+			this.player.makeMove(this.board, res);
+			System.out.println(this.board.toString());
+
+			// Get response from the opponent
+			res = this.readLineFromServer();
 			if (res.contains(Protocols.MOVE + Protocols.TILDE)) {
-				System.out.println(opponent.getName() + ": " + res);
+				System.out.println(this.opponent.getName() + ": " + res);
 				res = res.replace(Protocols.MOVE + Protocols.TILDE, "");
-				opponent.makeMove(board, res);
-				System.out.println(board.toString());
-				if (board.gameOver()) {
-					resetGame();
+				this.opponent.makeMove(this.board, res);
+				System.out.println(this.board.toString());
+
+				if (this.board.gameOver()) {
+					this.resetGame();
 					System.out.println("Server: " + readLineFromServer());
 				}
 			} else if (res.contains(Protocols.GAMEOVER + Protocols.TILDE)) {
-				resetGame();
+				this.resetGame();
 				System.out.println("Server: " + res);
 			} else {
 				System.out.println("Server: " + res);
@@ -314,16 +318,16 @@ public class CollectoClient {
 	}
 	
 	public void handleQuit() throws ServerUnavailableException, ProtocolException {
-		sendMessage(Protocols.QUIT);
-		closeConnection();
+		this.sendMessage(Protocols.QUIT);
+		this.closeConnection();
 	}
 	
 	public void handleAI(int type) throws ServerUnavailableException, ProtocolException {
-		playerType = type;
-		if (playerType == 1) {
-			((ComputerPlayer) player).setStrategy(new SmartStrategy(player));
-		} else if (playerType == 2) {
-			((ComputerPlayer) player).setStrategy(new NaiveStrategy());
+		this.playerType = type;
+		if (this.playerType == 1) {
+			((ComputerPlayer) this.player).setStrategy(new SmartStrategy(this.player));
+		} else if (this.playerType == 2) {
+			((ComputerPlayer) this.player).setStrategy(new NaiveStrategy());
 		}
 	}
 	
@@ -335,7 +339,8 @@ public class CollectoClient {
 	 * @throws ProtocolException
 	 */
 	public void setBoard(String res) throws ServerUnavailableException, ProtocolException {
-		player.reset();
+		this.player.reset();
+
 		String[] gameStr = res.split(Protocols.TILDE);
 		Colors[][] fields = new Colors[Board.DIM][Board.DIM];
 		for (int i = 1; i < Board.DIM * Board.DIM + 1; i++) {
@@ -343,6 +348,7 @@ public class CollectoClient {
 				col = (i - 1) % Board.DIM;
 			fields[row][col] = Colors.values()[Integer.parseInt(gameStr[i])];
 		}
+
 		// Loop through the array and print each element
         for (int i = 0; i < Board.DIM; i++) {
             for (int j = 0; j < Board.DIM; j++) {
@@ -351,31 +357,32 @@ public class CollectoClient {
             System.out.println(); // Move to the next line after each row
         }
 
-		board = new Board(fields);
-		state = States.PLAYING;
-		System.out.println(board.toString());
+		this.board = new Board(fields);
+		this.state = States.PLAYING;
+		System.out.println(this.board.toString());
 		
 		/*
-		 * If the peer client plays first
+		 * If the opponent plays first
 		 */
-		if (player.getName().equals(gameStr[gameStr.length - 2])) {
-			opponent = new HumanPlayer(gameStr[gameStr.length - 1]);
+		if (this.player.getName().equals(gameStr[gameStr.length - 2])) {
+			this.opponent = new HumanPlayer(gameStr[gameStr.length - 1]);
 		} else {
-			String move = readLineFromServer();
+			String move = this.readLineFromServer();
 			if (move.contains(Protocols.MOVE + Protocols.TILDE)) {
-				opponent = new HumanPlayer(gameStr[gameStr.length - 2]);
-				System.out.println(opponent.getName() + ": " + move);
+				this.opponent = new HumanPlayer(gameStr[gameStr.length - 2]);
+				System.out.println(this.opponent.getName() + ": " + move);
+
 				move = move.replace(Protocols.MOVE + Protocols.TILDE, "");
+
 				//opponent move first
-				opponent.makeMove(board, move);
-				System.out.println(board.toString());
+				this.opponent.makeMove(this.board, move);
+				System.out.println(this.board.toString());
 			} else if (move.contains(Protocols.GAMEOVER)) {
-				resetGame();
+				this.resetGame();
 				System.out.println("Server: " + move);
 			} else {
 				System.out.println("Server: " + move);
 			}
 		}
 	}
-	
 }

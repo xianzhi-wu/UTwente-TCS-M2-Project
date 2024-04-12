@@ -22,71 +22,7 @@ public class CollectoClientTUI {
 	public CollectoClientTUI() {
 		this.client = new CollectoClient();
 	}
-	
-	/**
-	 * Start the client to play the game.
-	 * @throws ServerUnavailableException
-	 * @throws ProtocolException
-	 */
-	public void start() throws ServerUnavailableException, ProtocolException {
-		
-		System.out.println("\n-- Collecto client --\n" + 
-							"1, AI player 01(Smart)\n" + 
-							"2, AI player 02(Naive)\n" +
-							"3, Human player\n");
-							
-		System.out.print("Your option: ");
-		
-		int type = TextIO.getlnInt();
-		if (type != 1 && type != 2) {
-			type = 3;
-		}
-		client.setPlayerType(type);
-		
-		while (client.getState().equals(States.NEWIN)) {
-			System.out.print("Say something to server: ");
-			String sayHello = TextIO.getln();
-			client.handleHello(Protocols.HELLO + Protocols.TILDE + sayHello);
-		}
-		
-		while (client.getState().equals(States.SAYHELLO)) {
-			System.out.print("Enter your name to login: ");
-			String name = TextIO.getln();
-			client.handleLogin(Protocols.LOGIN + Protocols.TILDE + name);
-		}
-		
-		player = client.getPlayer();
-		boolean exit = false;
-		while (!exit) {
-			String input = "";
-			if (player instanceof ComputerPlayer) {
-				if (client.getState().equals(States.PLAYING)) {
-					String move = player.determineMove(client.getBoard());
-					if (!move.equals("-1")) {
-						input = "MOVE~" + move;
-						System.out.println(player.getName() + "(" + ((ComputerPlayer) player).getStrategy().getName() + ")" + ": " + input);
-					} else {
-						continue;
-					}
-				} else {
-					System.out.print(player.getName() + "(" + ((ComputerPlayer) player).getStrategy().getName() + ")" + ": ");
-					input = TextIO.getlnString();
-				}
-			} else {
-				System.out.print(player.getName() + ": ");
-				input = TextIO.getlnString();
-			}
-			
-			if (input.equals(Protocols.QUIT)) {
-				exit = true;
-				client.handleQuit();
-			} else {
-				handleUserInput(input);
-			}
-		}
-		
-	}
-	
+
 	public void setUp() {
 		System.out.print("Input server address for client: ");
 		String host = TextIO.getlnString();
@@ -100,6 +36,83 @@ public class CollectoClientTUI {
 	public boolean createConnection() {
 		return client.createConnection();
 	}
+	
+	public void setPlayerType() {
+		System.out.println("\n-- Collecto client --\n" + 
+							"1, AI player 01(Smart)\n" + 
+							"2, AI player 02(Naive)\n" +
+							"3, Human player\n");
+							
+		System.out.print("Your option: ");
+		
+		int type = TextIO.getlnInt();
+		if (type != 1 && type != 2) {
+			type = 3;
+		}
+		this.client.setPlayerType(type);
+	}
+
+	public void handleHello() throws ServerUnavailableException, ProtocolException {
+		while (this.client.getState().equals(States.NEWIN)) {
+			System.out.print("Say something to server: ");
+			String sayHello = TextIO.getln();
+			this.client.handleHello(Protocols.HELLO + Protocols.TILDE + sayHello);
+		}
+	}
+
+	public void handleLogin() throws ServerUnavailableException, ProtocolException {
+		while (this.client.getState().equals(States.SAYHELLO)) {
+			System.out.print("Enter your name to login: ");
+			String name = TextIO.getln();
+			this.client.handleLogin(Protocols.LOGIN + Protocols.TILDE + name);
+		}
+	}
+
+	public void getUserInput() throws ServerUnavailableException, ProtocolException {
+		this.player = this.client.getPlayer();
+		boolean exit = false;
+
+		while (!exit) {
+			String input = "";
+
+			if (this.player instanceof ComputerPlayer) {
+				if (this.client.getState().equals(States.PLAYING)) {
+					String move = this.player.determineMove(client.getBoard());
+					if (!move.equals("-1")) {
+						input = "MOVE" + Protocols.TILDE + move;
+						System.out.println(this.player.getName() + ": " + input);
+					} else {
+						continue;
+					}
+				} else {
+					System.out.print(this.player.getName() + ": ");
+					input = TextIO.getlnString();
+				}
+			} else {
+				System.out.print(this.player.getName() + ": ");
+				input = TextIO.getlnString();
+			}
+			
+			if (input.equals(Protocols.QUIT)) {
+				exit = true;
+				this.client.handleQuit();
+			} else {
+				this.handleUserInput(input);
+			}
+		}
+	}
+	
+	/**
+	 * Start the client to play the game.
+	 * @throws ServerUnavailableException
+	 * @throws ProtocolException
+	 */
+	public void start() throws ServerUnavailableException, ProtocolException {
+		this.setPlayerType();
+		this.handleHello();
+		this.handleLogin();
+		this.getUserInput();
+	}
 
 	/**
 	 * handle the user input.
@@ -108,97 +121,87 @@ public class CollectoClientTUI {
 	 * @throws ProtocolException
 	 */
 	public void handleUserInput(String input) throws ServerUnavailableException, ProtocolException {
+		String command = input.split(Protocols.TILDE)[0];
 		
-		String[] splitted = input.split("~"); 
-		String commandString = splitted[0];
-		
-		switch (commandString) {
-			case Protocols.HELLO:
-				if (splitted.length > 1) {
-					client.handleHello(input);
-				} else {
-					System.out.println(Protocols.ERROR + Protocols.TILDE + "Invalid input");
-				}
-				break;
-			case Protocols.LOGIN:
-				if (client.getState().equals(States.HANDSHANK) || client.getState().equals(States.GAMEOVER)) {
-					System.out.println(Protocols.ALREADYLOGGEDIN);
-				} else {
-					if (splitted.length == 2) {
-						client.handleLogin(input);
-					} else {
-						System.out.println(Protocols.ERROR + Protocols.TILDE + "Invalid input");
-					}
-				}
-				break;
+		switch (command) {
 			case Protocols.QUEUE:
-				if (splitted.length == 1) {
-					client.handleQueue(input);
-				} else {
-					System.out.println(Protocols.ERROR + Protocols.TILDE + "Invalid input");
-				}
+				this.client.handleQueue(input);
 				break;
 			case Protocols.MOVE:
-				if (client.getState().equals(States.PLAYING)) {
-					board = client.getBoard();
-					if (splitted.length == 2) {
-						if (player instanceof ComputerPlayer || 
-								(board != null && board.isValidSingleMove(board.convertMoveStr(splitted[1])))) {
-							client.handleMove(input);
-						} else {
-							System.out.println(Protocols.ERROR + ": " + splitted[1] + " is not a valid move.");
-						}
-					} else if (splitted.length == 3) {
-						if (player instanceof ComputerPlayer || 
-								(board != null && board.isValidDoubleMove(board.convertMoveStr(splitted[1]), board.convertMoveStr(splitted[2])))) {
-							client.handleMove(input);
-						} else {
-							System.out.println(Protocols.ERROR + ": " + splitted[1] + Protocols.TILDE + splitted[2] + " is not a valid move.");
-						}
-					} else {
-						System.out.println(Protocols.ERROR + Protocols.TILDE + "Invalid input");
-					}
-				} else {
-					System.out.println(Protocols.ERROR + Protocols.TILDE + "Untimely MOVE");
-				}
+				this.handleMove(input);
 				break;
 			case Protocols.LIST:
-				client.handleList(input);
+				this.client.handleList(input);
 				break;
 			case Protocols.RANK:
-				client.handleRank(input);
+				this.client.handleRank(input);
 				break;
 			case Protocols.HELP:
-				printHelpMenu();
+				this.printHelpMenu();
 				break;
 			case Protocols.HINT:
-				if (client.getState().equals(States.PLAYING)) {
-					board = client.getBoard();
-					System.out.println("Hint for move: " + new NaiveStrategy().determineMove(board));
-				} else {
-					System.out.println(Protocols.ERROR + Protocols.TILDE + "Untimely HINT");
-				}
+				this.hint();
 				break;
 			case "AI":
-				if (player instanceof ComputerPlayer) {
-					System.out.println("\n-- Change AI --\n" + 
-							"1, Smart\n" + 
-							"2, Naive\n");
-					System.out.print("Your option: ");
-					int type = TextIO.getlnInt();
-					while (!(type == 1 || type == 2)) {
-						type = TextIO.getlnInt();
-					}
-					client.handleAI(type);
-				} else {
-					System.out.println(Protocols.ERROR + Protocols.TILDE + "Can't change AI");
-				}
+				this.changeAI();
 				break;
 			default:
 				System.out.println("Unkown command: " + input);
 				printHelpMenu();
 		}
-		
+	}
+
+	public void handleMove(String input) throws ServerUnavailableException, ProtocolException {
+		String[] command = input.split(Protocols.TILDE);
+		if (this.client.getState().equals(States.PLAYING)) {
+			this.board = this.client.getBoard();
+			if (command.length == 2) {
+				if (this.player instanceof ComputerPlayer || 
+						(this.board != null && this.board.isValidSingleMove(this.board.convertMoveStr(command[1])))) {
+					this.client.handleMove(input);
+				} else {
+					System.out.println(Protocols.ERROR + ": " + command[1] + " is not a valid move.");
+				}
+			} else if (command.length == 3) {
+				if (this.player instanceof ComputerPlayer || 
+						(this.board != null && this.board.isValidDoubleMove(this.board.convertMoveStr(command[1]), board.convertMoveStr(command[2])))) {
+					this.client.handleMove(input);
+				} else {
+					System.out.println(Protocols.ERROR + ": " + command[1] + Protocols.TILDE + command[2] + " is not a valid move.");
+				}
+			} else {
+				System.out.println(Protocols.ERROR + Protocols.TILDE + "Invalid input");
+			}
+		} else {
+			System.out.println(Protocols.ERROR + Protocols.TILDE + "Untimely MOVE");
+		}
+	}
+
+	public void changeAI() throws ServerUnavailableException, ProtocolException {
+		if (this.player instanceof ComputerPlayer) {
+			System.out.println("\n-- Change AI --\n" + 
+								"1, Smart\n" + 
+								"2, Naive\n");
+
+			System.out.print("Your option: ");
+
+			int type = TextIO.getlnInt();
+			while (!(type == 1 || type == 2)) {
+				type = TextIO.getlnInt();
+			}
+			this.client.handleAI(type);
+		} else {
+			System.out.println(Protocols.ERROR + Protocols.TILDE + "Can't change AI");
+		}
+	}
+
+	public void hint() {
+		if (this.client.getState().equals(States.PLAYING)) {
+			this.board = this.client.getBoard();
+			System.out.println("Hint for move: " + new NaiveStrategy().determineMove(this.board));
+		} else {
+			System.out.println(Protocols.ERROR + Protocols.TILDE + "Untimely HINT");
+		}
 	}
 	
 	public void printHelpMenu() {

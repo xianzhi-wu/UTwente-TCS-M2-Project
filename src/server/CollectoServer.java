@@ -25,8 +25,8 @@ public class CollectoServer implements Runnable {
 	 * Constructs a new CollectoServer. Initializes the clients list
 	 */
 	public CollectoServer() {
-		clients = new ArrayList<>();
-		clientsInQueue = new ArrayList<>();
+		this.clients = new ArrayList<>();
+		this.clientsInQueue = new ArrayList<>();
 	}
 
 	/**
@@ -40,9 +40,9 @@ public class CollectoServer implements Runnable {
 		while (openNewSocket) {
 			try {
 				// Sets up the Collecto application
-				setup();
+				this.setup();
 				while (true) {
-					Socket socket = ssock.accept();
+					Socket socket = this.ssock.accept();
 					System.out.println("Client connected from: " 
 							+ socket.getLocalAddress().getHostName());
 					
@@ -71,14 +71,13 @@ public class CollectoServer implements Runnable {
 	 * @ensures a serverSocket is opened.
 	 */
 	public void setup() {
-		ssock = null;
-		while (ssock == null) {
+		this.ssock = null;
+		while (this.ssock == null) {
 			// try to open a new ServerSocket
 			try {
-				System.out.println("Attempting to open a socket on port " 
-						+ port + "...");
-				ssock = new ServerSocket(port);
-				System.out.println("Server started on " + ssock.getInetAddress() + " and port " + port);
+				System.out.println("Attempting to open a socket on port " + this.port + "...");
+				this.ssock = new ServerSocket(this.port);
+				System.out.println("Server started on port " + port);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -91,20 +90,16 @@ public class CollectoServer implements Runnable {
 	 * @return true if the list doesn't contains this client, otherwise return false
 	 */
 	public synchronized void addClient(CollectoClientHandler client) {
-		clients.add(client);
+		this.clients.add(client);
 	}
 	
 	public boolean clientExists(String name) {
-		boolean res = false;
-		
 		for (CollectoClientHandler client : clients) {
 			if (client.getName().equals(name)) {
-				res = true;
-				break;
+				return true;
 			}
 		}
-
-		return res;
+		return false;
 	}
 	
 	/**
@@ -112,7 +107,7 @@ public class CollectoServer implements Runnable {
 	 * @requires client != null
 	 */
 	public synchronized void removeClient(CollectoClientHandler client) {
-		clients.remove(client);
+		this.clients.remove(client);
 	}
 	
 	/**
@@ -120,7 +115,7 @@ public class CollectoServer implements Runnable {
 	 * @requires client != null
 	 */
 	public synchronized void removeClientInQueue(CollectoClientHandler client) {
-		clientsInQueue.remove(client);
+		this.clientsInQueue.remove(client);
 	}
 	
 	public synchronized String showClienList() {
@@ -138,19 +133,19 @@ public class CollectoServer implements Runnable {
 	 * @param client
 	 */
 	public synchronized void putInQueue(CollectoClientHandler client) {
-		clientsInQueue.add(client);
-		if (clientsInQueue.size() > 1) {
-			CollectoClientHandler player01 = clientsInQueue.get(0);
-			CollectoClientHandler player02 = clientsInQueue.get(1);
-			GameRoom gameRoom = new GameRoom(player01, player02);
-			clientsInQueue.remove(player01);
-			clientsInQueue.remove(player02);
-			gameRoom.startGame();
+		this.clientsInQueue.add(client);
+		if (this.clientsInQueue.size() > 1) {
+			CollectoClientHandler player01 = this.clientsInQueue.get(0);
+			CollectoClientHandler player02 = this.clientsInQueue.get(1);
+			GameLobby lobby = new GameLobby(player01, player02);
+			this.clientsInQueue.remove(player01);
+			this.clientsInQueue.remove(player02);
+			lobby.startGame();
 		}
 	}
 	
 	public List<CollectoClientHandler> getClientList() {
-		return clients;
+		return this.clients;
 	}
 	
 }
