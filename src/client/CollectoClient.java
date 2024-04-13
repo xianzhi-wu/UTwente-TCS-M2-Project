@@ -100,14 +100,13 @@ public class CollectoClient {
 			return true;
 		} catch (Exception e) {
 			System.out.println("ERROR: could not create a socket on " + this.host + " and port " + this.port + ".");
-
 			return false;
 		}
 	}
 
 	/**
 	 * Resets the serverSocket, inputStream and outputStream to null
-	 * Always make sure to close current connections via shutdown() 
+	 * Always make sure to close current connections via closeConnection() 
 	 * before calling this method!
 	 */
 	public void clearConnection() {
@@ -123,16 +122,12 @@ public class CollectoClient {
 	 * @throws ServerUnavailableException if IO errors occur.
 	 */
 	public synchronized void sendMessage(String msg) throws ServerUnavailableException, ProtocolException {
-		if (this.out != null) {
-			try {
-				this.out.write(msg);
-				this.out.newLine();
-				this.out.flush();
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				throw new ServerUnavailableException("Could not write to server.");
-			}
-		} else {
+		try {
+			this.out.write(msg);
+			this.out.newLine();
+			this.out.flush();
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
 			throw new ServerUnavailableException("Could not write to server.");
 		}
 	}
@@ -212,8 +207,7 @@ public class CollectoClient {
 	public void handleHello(String input) throws ServerUnavailableException, ProtocolException {
 		this.sendMessage(input);
 		String res = this.readLineFromServer();
-		System.out.println("Server: " + res);
-		if (res.equals(Protocols.HELLO + Protocols.TILDE + this.player.getName())) {
+		if (res.startsWith(Protocols.HELLO + Protocols.TILDE)) {
 			this.state = States.SAYHELLO;
 		}
 	}
@@ -227,19 +221,50 @@ public class CollectoClient {
 		this.sendMessage(input);
 		String res = this.readLineFromServer();
 		if (res.equals(Protocols.LOGIN)) {
-			String[] inputArr = input.split(Protocols.TILDE);
+			String name = input.split(Protocols.TILDE)[1];
 			if (this.playerType == 1 || this.playerType == 2) {
-				this.player = new ComputerPlayer(inputArr[1], this.playerType);
+				this.player = new ComputerPlayer(name, this.playerType);
 			} else if (this.playerType == 3) {
-				this.player = new HumanPlayer(inputArr[1]);
+				this.player = new HumanPlayer(name);
 			}
-			this.state = States.HANDSHANK;
+			this.state = States.HANDSHACK;
 		} else {
-			// this.player = null;
 			System.out.println("Server: " + res);
 		}
 	}
-	
+
+	/**
+	 * Join the queue for the game.
+	 * @param input QUEUE
+	 * @throws ServerUnavailableException
+	 * @throws ProtocolException
+	 */
+	public void handleQueue(String input) throws ServerUnavailableException, ProtocolException {
+		this.sendMessage(input);
+		String res = this.readLineFromServer();
+		if (res.equals(Protocols.QUEUE)) {
+			this.state = States.QUEUEING;
+			this.handleQueueing();
+		} else if (res.startsWith(Protocols.NEWGAME)) {
+			this.state = States.PLAYING;
+			this.setBoard(res);
+		} else {
+			System.out.println("Server: " + res);
+		}
+	}
+
+	public void handleQueueing() throws ServerUnavailableException, ProtocolException {
+		while (this.state.equals(States.QUEUEING)) {
+			String res = this.readLineFromServer();
+			if (res.startsWith(Protocols.NEWGAME)) {
+				this.state = States.PLAYING;
+				this.setBoard(res);
+			} else {
+				System.out.println("Server: " + res);
+			}
+		}
+	}
+
 	/**
 	 * See the client list.
 	 * @param input LIST
@@ -260,24 +285,6 @@ public class CollectoClient {
 	public void handleRank(String input) throws ServerUnavailableException, ProtocolException {
 		this.sendMessage(input);
 		System.out.println(this.readMultipleLinesFromServer());
-	}
-	
-	/**
-	 * Join the queue for the game.
-	 * @param input QUEUE
-	 * @throws ServerUnavailableException
-	 * @throws ProtocolException
-	 */
-	public void handleQueue(String input) throws ServerUnavailableException, ProtocolException {
-		this.sendMessage(input);
-		//state = States.QUEUEING;
-		String res = this.readLineFromServer();
-		if (res.contains(Protocols.NEWGAME)) {
-			System.out.println(res);
-			this.setBoard(res);
-		} else {
-			System.out.println("Server: " + res);
-		}
 	}
 	
 	/**
@@ -318,11 +325,12 @@ public class CollectoClient {
 	}
 	
 	public void handleQuit() throws ServerUnavailableException, ProtocolException {
+		this.state = States.QUITED;
 		this.sendMessage(Protocols.QUIT);
 		this.closeConnection();
 	}
 	
-	public void handleAI(int type) throws ServerUnavailableException, ProtocolException {
+	public void handleChangeAI(int type) throws ServerUnavailableException, ProtocolException {
 		this.playerType = type;
 		if (this.playerType == 1) {
 			((ComputerPlayer) this.player).setStrategy(new SmartStrategy(this.player));
@@ -358,7 +366,6 @@ public class CollectoClient {
         }
 
 		this.board = new Board(fields);
-		this.state = States.PLAYING;
 		System.out.println(this.board.toString());
 		
 		/*
@@ -367,21 +374,21 @@ public class CollectoClient {
 		if (this.player.getName().equals(gameStr[gameStr.length - 2])) {
 			this.opponent = new HumanPlayer(gameStr[gameStr.length - 1]);
 		} else {
-			String move = this.readLineFromServer();
-			if (move.contains(Protocols.MOVE + Protocols.TILDE)) {
+			String msg = this.readLineFromServer();
+			if (msg.contains(Protocols.MOVE + Protocols.TILDE)) {
 				this.opponent = new HumanPlayer(gameStr[gameStr.length - 2]);
-				System.out.println(this.opponent.getName() + ": " + move);
+				System.out.println(this.opponent.getName() + ": " + msg);
 
-				move = move.replace(Protocols.MOVE + Protocols.TILDE, "");
+				msg = msg.replace(Protocols.MOVE + Protocols.TILDE, "");
 
 				//opponent move first
-				this.opponent.makeMove(this.board, move);
+				this.opponent.makeMove(this.board, msg);
 				System.out.println(this.board.toString());
-			} else if (move.contains(Protocols.GAMEOVER)) {
+			} else if (msg.contains(Protocols.GAMEOVER)) {
 				this.resetGame();
-				System.out.println("Server: " + move);
+				System.out.println("Server: " + msg);
 			} else {
-				System.out.println("Server: " + move);
+				System.out.println("Server: " + msg);
 			}
 		}
 	}

@@ -26,6 +26,7 @@ public class Protocols {
 	public static final String MOVE = "MOVE";
 	public static final String LIST = "LIST";
 	public static final String RANK = "RANK";
+	public static final String AI = "AI";
 	
 	public static final String ALREADYLOGGEDIN = "ALREADYLOGGEDIN";
 	

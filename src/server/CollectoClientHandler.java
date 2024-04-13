@@ -5,9 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-
 import java.net.Socket;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,12 +13,11 @@ import java.util.List;
 import collecto.Board;
 import collecto.NaiveStrategy;
 import collecto.Player;
-
 import utils.Protocols;
 import utils.States;
 
 public class CollectoClientHandler extends Player 
-	implements Runnable, Comparable<CollectoClientHandler> {
+				implements Runnable, Comparable<CollectoClientHandler> {
 
 	private BufferedReader in;
 	private BufferedWriter out;
@@ -30,31 +27,30 @@ public class CollectoClientHandler extends Player
 
 	private String name;
 	private int score;
+	private GameLobby gameLobby;
 	private States state = States.NEWIN;
-
-	private GameLobby lobby;
 
 	public CollectoClientHandler(Socket socket, CollectoServer collectoServer) throws IOException {
 		try {
-			this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-			this.sock = socket;
-			this.server = collectoServer;
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+			sock = socket;
+			server = collectoServer;
 		} catch (IOException e) {
 			e.getStackTrace();
-			this.shutdown();
 		}
 	}
 	
 	@Override
 	public void run() {
 		try {
-			String msg = this.in.readLine();
-			while (msg != null && !msg.equals(Protocols.QUIT)) {
-				handleCommand(msg);
-				msg = this.in.readLine();
+			String msg;
+			while (!state.equals(States.QUITED)) {
+				msg = in.readLine();
+				if (msg != null) {
+					handleCommand(msg);
+				}
 			}
-			shutdown();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,82 +58,70 @@ public class CollectoClientHandler extends Player
 
 	public void handleHello(String[] command) throws IOException {
 		if (command.length == 1) {
-			this.sendMessage(Protocols.ERROR + Protocols.TILDE + "Received HELLO message without description!");
+			sendMessage(Protocols.ERROR + Protocols.TILDE 
+					+ "Received HELLO message without description!");
 		} else if (command.length == 2) {
-			this.sendMessage(Protocols.HELLO + Protocols.TILDE + "Collecto server!");
-			this.state = States.SAYHELLO;
+			sendMessage(Protocols.HELLO + Protocols.TILDE + "Collecto server!");
+			state = States.SAYHELLO;
 		}
 	}
 
-	public void handleLogin(String[] command) throws IOException {
-		if (this.state.equals(States.NEWIN)) {
-			this.sendMessage(Protocols.ERROR + Protocols.TILDE + "Untimely LOGIN");
-		} else if (this.state.equals(States.SAYHELLO)) {
+	public void handLogin(String[] command) throws IOException {
+		if (state.equals(States.NEWIN)) {
+			sendMessage(Protocols.ERROR + Protocols.TILDE + "Untimely LOGIN");
+		} else if (state.equals(States.SAYHELLO)) {
 			if (command.length == 2) {
-				if (!this.server.clientExists(command[1])) {
-					this.name = command[1];
-					this.state = States.HANDSHANK;
-					this.server.addClient(this);
-					this.sendMessage(Protocols.LOGIN);
+				if (!server.clientExists(command[1])) {
+					name = command[1];
+					state = States.HANDSHACK;
+					server.addClient(this);
+					sendMessage(Protocols.LOGIN);
 				} else {
-					this.sendMessage(Protocols.ALREADYLOGGEDIN);
+					sendMessage(Protocols.ALREADYLOGGEDIN);
 				}
 			} else {
-				this.sendMessage(Protocols.ERROR + Protocols.TILDE + "Received LOGIN message with invalid number of parameters!");
+				sendMessage(Protocols.ERROR + Protocols.TILDE 
+						+ "Received LOGIN message with invalid number of parameters!");
 			}
 		}
 	}
 
 	public void handleQueue() throws IOException {
-		if (this.state.equals(States.QUEUEING)) {
-			this.server.removeClientInQueue(this);
-		} else if (this.state.equals(States.HANDSHANK) || this.state.equals(States.GAMEOVER)) {
-			this.state = States.QUEUEING;
-			this.server.putInQueue(this);
+		/*if (state.equals(States.QUEUEING)) {
+			server.removeClientInQueue(this);
+		} else*/ 
+		if (state.equals(States.HANDSHACK) || state.equals(States.GAMEOVER)) {
+			state = States.QUEUEING;
+			server.putInQueue(this);
 		} else {
-			this.sendMessage(Protocols.ERROR + Protocols.TILDE + "Untimely QUEUE");
+			sendMessage(Protocols.ERROR + Protocols.TILDE + "Untimely QUEUE");
 		}
 	}
 
 	public void handleMove(String[] command) throws IOException {
 		if (state.equals(States.PLAYING)) {
 			if (command.length > 1) {
-				String move = String.join(Protocols.TILDE, command);
-				this.lobby.makeMove(move, this);
+				String move;
+				if (command.length == 2) {
+					move = command[1];
+				} else {
+					move = command[1] + Protocols.TILDE + command[2];
+				}
+				gameLobby.makeMove(move, this);
 			} else {
-				this.sendMessage(Protocols.ERROR + Protocols.TILDE + "invalid input");
+				sendMessage(Protocols.ERROR + Protocols.TILDE + "invalid input");
 			}
 		} else {
-			this.sendMessage(Protocols.ERROR + Protocols.TILDE + "Untimely MOVE");
+			sendMessage(Protocols.ERROR + Protocols.TILDE + "Untimely MOVE");
 		}
-	}
-
-	/**
-	 * @return the total score of the player
-	 */
-	public int getTotalScore() {
-		return this.score + this.getScore();
-	}
-	
-	/**
-	 * Rank the (online) players by the score they have.
-	 * @return the player list
-	 * @throws IOException 
-	 */
-	public void getRankList() throws IOException {
-		String res = "\nRanking\n";
-		List<CollectoClientHandler> players = new ArrayList<>(this.server.getClientList());
-		Collections.sort(players);
-		for (CollectoClientHandler player : players) {
-			res += "Player: " + player.getName() + ", score: " + player.getTotalScore() + "\n";
-		}
-		res += Protocols.EOT;
-
-		this.sendMessage(res);
 	}
 
 	public void handleList() throws IOException {
-		this.sendMessage(this.server.showClienList());
+		sendMessage(server.showClienList());
+	}
+
+	public void handleRank() throws IOException {
+		sendMessage(getRankList());
 	}
 
 	/**
@@ -154,28 +138,28 @@ public class CollectoClientHandler extends Player
 		String[] command = msg.split(Protocols.TILDE);
 		switch (command[0]) {
 			case Protocols.HELLO:
-				this.handleHello(command);
+				handleHello(command);
 				break;
 			case Protocols.LOGIN:
-				this.handleLogin(command);
+				handLogin(command);
 				break;
 			case Protocols.QUEUE:
-				this.handleQueue();
+				handleQueue();
 				break;
 			case Protocols.MOVE:
-				this.handleMove(command);
+				handleMove(command);
 				break;
 			case Protocols.LIST:
-				this.handleList();
+				handleList();
 				break;
 			case Protocols.RANK:
-				this.getRankList();
+				handleRank();
 				break;
-			/*case Protocols.QUIT:
+			case Protocols.QUIT:
 				shutdown();
-				break;*/
+				break;
 			default:
-				this.sendMessage("Unkown command: " + msg);
+				sendMessage("Unkown command: " + msg);
 		}
 	}
 	
@@ -186,19 +170,20 @@ public class CollectoClientHandler extends Player
 	 */
 	private void shutdown() throws IOException {
 		try {
-			this.in.close();
-			this.out.close();
-			this.sock.close();
+			in.close();
+			out.close();
+			sock.close();
 			System.out.println("Player " + this.getName() + " disconnected");
-
-			this.server.removeClient(this);
+			server.removeClient(this);
+			state = States.QUITED;
 			
-			if (this.state.equals(States.PLAYING)) {
-				this.lobby.removePlayer(this);
+			if (state.equals(States.PLAYING)) {
+				gameLobby.removePlayer(this);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	/**
@@ -207,41 +192,43 @@ public class CollectoClientHandler extends Player
 	 * @throws IOException
 	 */
 	public void sendMessage(String msg) throws IOException {
-		this.out.write(msg);
-		this.out.newLine();
-		this.out.flush();
+		out.write(msg);
+		out.newLine();
+		out.flush();
+	}
+	
+	/**
+	 * @return the total score of the player
+	 */
+	public int getTotalScore() {
+		return score + this.getScore();
+	}
+	
+	@Override
+	public String determineMove(Board board) {
+		return new NaiveStrategy().determineMove(board);
+	}
+	
+	/**
+	 * Rank the (online) players by the score they have.
+	 * @return the player list
+	 */
+	public String getRankList() {
+		String res = "\nRanking\n";
+		List<CollectoClientHandler> players = new ArrayList<>(server.getClientList());
+		Collections.sort(players);
+		for (CollectoClientHandler player : players) {
+			res += "Player: " + player.getName() + ", score: " + player.getTotalScore() + "\n";
+		}
+		res += Protocols.EOT;
+		return res;
 	}
 	
 	@Override
 	public int compareTo(CollectoClientHandler o) {
 		return this.getScore() < o.getScore() ? -1 : (this.getScore() == o.getScore() ? 0 : 1);
 	}
-
-	@Override
-	public String determineMove(Board board) {
-		return new NaiveStrategy().determineMove(board);
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
 	
-	/**
-	 * Start the game and send a message containing the board, players' names to both players.
-	 * @param lobby
-	 * @param initStr
-	 */
-	public void startGame(GameLobby lobby, String initStr) {
-		try {
-			this.lobby = lobby;
-			this.state = States.PLAYING;
-			sendMessage(initStr);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * When the game is over, send a message to each player and reset both players.
 	 * @param res the result of the game
@@ -249,12 +236,32 @@ public class CollectoClientHandler extends Player
 	 */
 	public void gameOver(String res) throws IOException {
 		try {
-			this.lobby = null;
-			this.state = States.GAMEOVER;
+			gameLobby = null;
+			state = States.GAMEOVER;
 			sendMessage(res);
 			this.reset();
 		} catch (IOException e) {
-			shutdown();
+			e.getStackTrace();
+		}
+	}
+	
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * Start the game and send a message containing the board, players' names to both players.
+	 * @param gameLobby
+	 * @param initStr
+	 */
+	public void startGame(GameLobby lobby, String initStr) {
+		try {
+			this.gameLobby = lobby;
+			state = States.PLAYING;
+			sendMessage(initStr);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

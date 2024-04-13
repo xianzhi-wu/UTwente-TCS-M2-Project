@@ -68,87 +68,28 @@ public class CollectoClientTUI {
 		}
 	}
 
-	public void getUserInput() throws ServerUnavailableException, ProtocolException {
-		this.player = this.client.getPlayer();
-		boolean exit = false;
-
-		while (!exit) {
-			String input = "";
-
-			if (this.player instanceof ComputerPlayer) {
-				if (this.client.getState().equals(States.PLAYING)) {
-					String move = this.player.determineMove(client.getBoard());
-					if (!move.equals("-1")) {
-						input = "MOVE" + Protocols.TILDE + move;
-						System.out.println(this.player.getName() + ": " + input);
-					} else {
-						continue;
-					}
-				} else {
-					System.out.print(this.player.getName() + ": ");
-					input = TextIO.getlnString();
-				}
-			} else {
-				System.out.print(this.player.getName() + ": ");
-				input = TextIO.getlnString();
-			}
-			
-			if (input.equals(Protocols.QUIT)) {
-				exit = true;
-				this.client.handleQuit();
-			} else {
-				this.handleUserInput(input);
-			}
-		}
-	}
-	
 	/**
 	 * Start the client to play the game.
 	 * @throws ServerUnavailableException
 	 * @throws ProtocolException
 	 */
 	public void start() throws ServerUnavailableException, ProtocolException {
-		this.setPlayerType();
-		this.handleHello();
-		this.handleLogin();
-		this.getUserInput();
+		this.setUp();
+		if (this.createConnection()) {
+			this.setPlayerType();
+			this.handleHello();
+			this.handleLogin();
+			this.printHelpMenu();
+			this.getUserInput();
+		}
 	}
 
-	/**
-	 * handle the user input.
-	 * @param input
-	 * @throws ServerUnavailableException
-	 * @throws ProtocolException
-	 */
-	public void handleUserInput(String input) throws ServerUnavailableException, ProtocolException {
-		String command = input.split(Protocols.TILDE)[0];
-		
-		switch (command) {
-			case Protocols.QUEUE:
-				this.client.handleQueue(input);
-				break;
-			case Protocols.MOVE:
-				this.handleMove(input);
-				break;
-			case Protocols.LIST:
-				this.client.handleList(input);
-				break;
-			case Protocols.RANK:
-				this.client.handleRank(input);
-				break;
-			case Protocols.HELP:
-				this.printHelpMenu();
-				break;
-			case Protocols.HINT:
-				this.hint();
-				break;
-			case "AI":
-				this.changeAI();
-				break;
-			default:
-				System.out.println("Unkown command: " + input);
-				printHelpMenu();
-		}
+	public void handleQueue(String input) throws ServerUnavailableException, ProtocolException {
+		this.client.handleQueue(input);
+	}
+
+	public void handleQuit() throws ServerUnavailableException, ProtocolException {
+		this.client.handleQuit();
 	}
 
 	public void handleMove(String input) throws ServerUnavailableException, ProtocolException {
@@ -177,7 +118,7 @@ public class CollectoClientTUI {
 		}
 	}
 
-	public void changeAI() throws ServerUnavailableException, ProtocolException {
+	public void handleChangeAI() throws ServerUnavailableException, ProtocolException {
 		if (this.player instanceof ComputerPlayer) {
 			System.out.println("\n-- Change AI --\n" + 
 								"1, Smart\n" + 
@@ -189,7 +130,7 @@ public class CollectoClientTUI {
 			while (!(type == 1 || type == 2)) {
 				type = TextIO.getlnInt();
 			}
-			this.client.handleAI(type);
+			this.client.handleChangeAI(type);
 		} else {
 			System.out.println(Protocols.ERROR + Protocols.TILDE + "Can't change AI");
 		}
@@ -206,22 +147,84 @@ public class CollectoClientTUI {
 	
 	public void printHelpMenu() {
 		System.out.println("\nPossible inputs:\n" + 
-				"- HELLO~<server description>[~extension]*\n" +
+				"- HELLO~<server description>\n" +
 				"- LOGIN~<username>\n" +
-				"- LIST\n" + 
 				"- QUEUE\n" +
+				"- AI\n" +
+				"- LIST\n" + 
 				"- RANK\n" +
 				"- HINT\n" +
 				"- MOVE~<first push>[~second push]\n");
 	}
+	
+	public void handleList(String input) throws ServerUnavailableException, ProtocolException {
+		this.client.handleList(input);
+	}
+
+	public void handleRank(String input) throws ServerUnavailableException, ProtocolException {
+		this.client.handleRank(input);
+	}
+
+	public void getUserInput() throws ServerUnavailableException, ProtocolException {
+		while (!this.client.getState().equals(States.QUITED)) {
+			this.player = this.client.getPlayer();
+			String input = "";
+
+			if (this.player instanceof ComputerPlayer && this.client.getState().equals(States.PLAYING)) {
+				String move = this.player.determineMove(this.client.getBoard());
+				input = Protocols.MOVE + Protocols.TILDE + move;
+				System.out.println(this.player.getName() + ": " + input);
+			} else {
+				System.out.print(this.player.getName() + ": ");
+				input = TextIO.getlnString();
+			}
+
+			this.handleUserInput(input);
+		}
+	}
+
+	/**
+	 * handle the user input.
+	 * @param input
+	 * @throws ServerUnavailableException
+	 * @throws ProtocolException
+	 */
+	public void handleUserInput(String input) throws ServerUnavailableException, ProtocolException {
+		String command = input.split(Protocols.TILDE)[0];
+		
+		switch (command) {
+			case Protocols.QUEUE:
+				this.handleQueue(input);
+				break;
+			case Protocols.MOVE:
+				this.handleMove(input);
+				break;
+			case Protocols.LIST:
+				this.handleList(input);
+				break;
+			case Protocols.RANK:
+				this.handleRank(input);
+				break;
+			case Protocols.HELP:
+				this.printHelpMenu();
+				break;
+			case Protocols.HINT:
+				this.hint();
+				break;
+			case Protocols.QUIT:
+				this.handleQuit();
+				break;
+			case Protocols.AI:
+				this.handleChangeAI();
+				break;
+			default:
+				System.out.println("Unkown command: " + input);
+				this.printHelpMenu();
+		}
+	}
 
 	public static void main(String[] args) throws ServerUnavailableException, ProtocolException {
 		CollectoClientTUI clientTUI = new CollectoClientTUI();
-		clientTUI.setUp();
-		if (clientTUI.createConnection()) {
-			clientTUI.start();
-		} else {
-			System.out.println("Failed to connect to server");
-		}
+		clientTUI.start();
 	}
 }

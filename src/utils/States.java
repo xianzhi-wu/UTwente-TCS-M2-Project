@@ -3,8 +3,9 @@ package utils;
 public enum States {
 	NEWIN,
 	SAYHELLO,
-	HANDSHANK,
+	HANDSHACK,
 	QUEUEING,
 	PLAYING,
+	QUITED,
 	GAMEOVER
 }

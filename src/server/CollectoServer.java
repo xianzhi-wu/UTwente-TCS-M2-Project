@@ -30,8 +30,8 @@ public class CollectoServer implements Runnable {
 	}
 
 	/**
-	 * Opens a new socket by calling {@link #setup()} and starts a new
-	 * HotelClientHandler for every connecting client.
+	 * Opens a new socket by calling  {@link #setup()} and starts a new
+	 * CollectoClientHandler for every connecting client.
 	 * 
 	 * If {@link #setup()} throws a ExitProgram exception, stop the program. 
 	 */
@@ -44,7 +44,7 @@ public class CollectoServer implements Runnable {
 				while (true) {
 					Socket socket = this.ssock.accept();
 					System.out.println("Client connected from: " 
-							+ socket.getLocalAddress().getHostName());
+						+ socket.getLocalAddress().getHostName());
 					
 					// Starts a thread 
 					CollectoClientHandler handler = new CollectoClientHandler(socket, this);
@@ -62,7 +62,7 @@ public class CollectoServer implements Runnable {
 	}
 
 	/**
-	 * Sets up a new game using {@link #setupHotel()} and opens a new 
+	 * Sets up a new game and opens a new 
 	 * ServerSocket at localhost on a user-defined port.
 	 * 
 	 * The user is asked to input a port, after which a socket is attempted 
@@ -129,7 +129,7 @@ public class CollectoServer implements Runnable {
 	
 	/**
 	 * Put the client in queue, if there are two players in the queue.
-	 * And create a game room for the players and then start the game
+	 * And create a game lobby for the players and then start the game
 	 * @param client
 	 */
 	public synchronized void putInQueue(CollectoClientHandler client) {
