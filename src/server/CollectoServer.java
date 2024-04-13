@@ -36,24 +36,20 @@ public class CollectoServer implements Runnable {
 	 * If {@link #setup()} throws a ExitProgram exception, stop the program. 
 	 */
 	public void run() {
-		boolean openNewSocket = true;
-		while (openNewSocket) {
-			try {
-				// Sets up the Collecto application
-				this.setup();
-				while (true) {
-					Socket socket = this.ssock.accept();
-					System.out.println("Client connected from: " 
-						+ socket.getLocalAddress().getHostName());
-					
-					// Starts a thread 
-					CollectoClientHandler handler = new CollectoClientHandler(socket, this);
-					new Thread(handler).start();
-				}
-			} catch (IOException e) {
-				openNewSocket = false;
-				System.out.println("A server IO error occurred: " + e.getMessage());
+		try {
+			// Sets up the Collecto application
+			this.setup();
+			while (true) {
+				Socket socket = this.ssock.accept();
+				System.out.println("Client connected from: " 
+					+ socket.getLocalAddress().getHostName());
+				
+				// Starts a thread 
+				CollectoClientHandler handler = new CollectoClientHandler(socket, this);
+				new Thread(handler).start();
 			}
+		} catch (IOException e) {
+			System.out.println("A server IO error occurred: " + e.getMessage());
 		}
 	}
 	
