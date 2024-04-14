@@ -6,6 +6,6 @@ public enum States {
 	HANDSHACK,
 	QUEUEING,
 	PLAYING,
-	QUITED,
-	GAMEOVER
+	GAMEOVER,
+	QUITED
 }

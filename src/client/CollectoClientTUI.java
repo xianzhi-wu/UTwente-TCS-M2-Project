@@ -227,4 +227,5 @@ public class CollectoClientTUI {
 		CollectoClientTUI clientTUI = new CollectoClientTUI();
 		clientTUI.start();
 	}
+	
 }

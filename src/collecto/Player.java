@@ -100,4 +100,5 @@ public abstract class Player {
     public void reset() {
     	this.colorMap = new HashMap<>();
     }
+    
 }

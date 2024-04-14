@@ -3,6 +3,7 @@ package collecto;
 import utils.TextIO;
 
 public class Game {
+    
     public static final int NUMBER_PLAYERS = 2;
 
     /**
@@ -118,4 +119,5 @@ public class Game {
     		System.out.printf("Draw. Got the same score %d\n", players[0].getScore());
     	}
     }
+
 }

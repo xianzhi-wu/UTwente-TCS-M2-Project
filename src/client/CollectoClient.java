@@ -138,18 +138,14 @@ public class CollectoClient {
 	 * @throws ServerUnavailableException if IO errors occur.
 	 */
 	public String readLineFromServer() throws ServerUnavailableException {
-		if (this.in != null) {
-			try {
-				// Read and return answer from Server
-				String answer = this.in.readLine();
-				if (answer == null) {
-					throw new ServerUnavailableException("Could not read from server.");
-				}
-				return answer;
-			} catch (IOException e) {
+		try {
+			// Read and return answer from Server
+			String answer = this.in.readLine();
+			if (answer == null) {
 				throw new ServerUnavailableException("Could not read from server.");
 			}
-		} else {
+			return answer;
+		} catch (IOException e) {
 			throw new ServerUnavailableException("Could not read from server.");
 		}
 	}
@@ -161,25 +157,18 @@ public class CollectoClient {
 	 * @return the concatenated lines sent by the server.
 	 * @throws ServerUnavailableException if IO errors occur.
 	 */
-	public String readMultipleLinesFromServer() 
-			throws ServerUnavailableException {
-		if (this.in != null) {
-			try {
-				// Read and return answer from Server
-				StringBuilder sb = new StringBuilder();
-				for (String line = this.in.readLine(); line != null
-						&& !line.equals(Protocols.EOT); 
-						line = this.in.readLine()) {
-					sb.append(line + System.lineSeparator());
-				}
-				return sb.toString();
-			} catch (IOException e) {
-				throw new ServerUnavailableException("Could not read "
-						+ "from server.");
+	public String readMultipleLinesFromServer() throws ServerUnavailableException {
+		try {
+			// Read and return answer from Server
+			StringBuilder sb = new StringBuilder();
+			for (String line = this.in.readLine(); line != null
+					&& !line.equals(Protocols.EOT); 
+					line = this.in.readLine()) {
+				sb.append(line + System.lineSeparator());
 			}
-		} else {
-			throw new ServerUnavailableException("Could not read "
-					+ "from server.");
+			return sb.toString();
+		} catch (IOException e) {
+			throw new ServerUnavailableException("Could not read from server.");
 		}
 	}
 	
@@ -192,7 +181,6 @@ public class CollectoClient {
 			this.in.close();
 			this.out.close();
 			this.serverSock.close();
-			System.out.println("Quit!");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -248,6 +236,7 @@ public class CollectoClient {
 		} else if (res.startsWith(Protocols.NEWGAME)) {
 			this.state = States.PLAYING;
 			this.setBoard(res);
+			this.setOpponent(res);
 		} else {
 			System.out.println("Server: " + res);
 		}
@@ -259,6 +248,7 @@ public class CollectoClient {
 			if (res.startsWith(Protocols.NEWGAME)) {
 				this.state = States.PLAYING;
 				this.setBoard(res);
+				this.setOpponent(res);
 			} else {
 				System.out.println("Server: " + res);
 			}
@@ -303,17 +293,20 @@ public class CollectoClient {
 
 			// Get response from the opponent
 			res = this.readLineFromServer();
-			if (res.contains(Protocols.MOVE + Protocols.TILDE)) {
+			if (res.startsWith(Protocols.MOVE + Protocols.TILDE)) {
 				System.out.println(this.opponent.getName() + ": " + res);
 				res = res.replace(Protocols.MOVE + Protocols.TILDE, "");
 				this.opponent.makeMove(this.board, res);
 				System.out.println(this.board.toString());
 
 				if (this.board.gameOver()) {
-					this.resetGame();
-					System.out.println("Server: " + readLineFromServer());
+					res = this.readLineFromServer();
+					System.out.println("Server: " + res);
+					if (res.startsWith(Protocols.GAMEOVER + Protocols.TILDE)) {
+						this.resetGame();
+					}
 				}
-			} else if (res.contains(Protocols.GAMEOVER + Protocols.TILDE)) {
+			} else if (res.startsWith(Protocols.GAMEOVER + Protocols.TILDE)) {
 				this.resetGame();
 				System.out.println("Server: " + res);
 			} else {
@@ -331,11 +324,13 @@ public class CollectoClient {
 	}
 	
 	public void handleChangeAI(int type) throws ServerUnavailableException, ProtocolException {
-		this.playerType = type;
-		if (this.playerType == 1) {
-			((ComputerPlayer) this.player).setStrategy(new SmartStrategy(this.player));
-		} else if (this.playerType == 2) {
-			((ComputerPlayer) this.player).setStrategy(new NaiveStrategy());
+		if (this.playerType != type) {
+			if (type == 1) {
+				((ComputerPlayer) this.player).setStrategy(new SmartStrategy(this.player));
+			} else if (type == 2) {
+				((ComputerPlayer) this.player).setStrategy(new NaiveStrategy());
+			}
+			this.playerType = type;
 		}
 	}
 	
@@ -357,34 +352,27 @@ public class CollectoClient {
 			fields[row][col] = Colors.values()[Integer.parseInt(gameStr[i])];
 		}
 
-		// Loop through the array and print each element
-        for (int i = 0; i < Board.DIM; i++) {
-            for (int j = 0; j < Board.DIM; j++) {
-                System.out.print(fields[i][j] + " ");
-            }
-            System.out.println(); // Move to the next line after each row
-        }
-
 		this.board = new Board(fields);
 		System.out.println(this.board.toString());
-		
-		/*
-		 * If the opponent plays first
-		 */
-		if (this.player.getName().equals(gameStr[gameStr.length - 2])) {
-			this.opponent = new HumanPlayer(gameStr[gameStr.length - 1]);
+	}
+
+	public void setOpponent(String res) throws ServerUnavailableException {
+		String[] gameStr = res.split(Protocols.TILDE);
+		int len = gameStr.length;
+
+		if (this.player.getName().equals(gameStr[len - 2])) {
+			this.opponent = new HumanPlayer(gameStr[len- 1]);
 		} else {
+			// Wait repsonse from the opponent
 			String msg = this.readLineFromServer();
-			if (msg.contains(Protocols.MOVE + Protocols.TILDE)) {
-				this.opponent = new HumanPlayer(gameStr[gameStr.length - 2]);
+			if (msg.startsWith(Protocols.MOVE + Protocols.TILDE)) {
+				this.opponent = new HumanPlayer(gameStr[len - 2]);
 				System.out.println(this.opponent.getName() + ": " + msg);
 
 				msg = msg.replace(Protocols.MOVE + Protocols.TILDE, "");
-
-				//opponent move first
 				this.opponent.makeMove(this.board, msg);
 				System.out.println(this.board.toString());
-			} else if (msg.contains(Protocols.GAMEOVER)) {
+			} else if (msg.startsWith(Protocols.GAMEOVER)) {
 				this.resetGame();
 				System.out.println("Server: " + msg);
 			} else {
@@ -392,4 +380,5 @@ public class CollectoClient {
 			}
 		}
 	}
+	
 }

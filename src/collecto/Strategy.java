@@ -42,4 +42,5 @@ public interface Strategy {
 		
 		return possibleMoves;
 	}
+	
 }

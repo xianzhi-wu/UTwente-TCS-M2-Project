@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utils.Protocols;
+import utils.States;
 
 public class CollectoServer implements Runnable {
 
@@ -41,8 +42,7 @@ public class CollectoServer implements Runnable {
 			this.setup();
 			while (true) {
 				Socket socket = this.ssock.accept();
-				System.out.println("Client connected from: " 
-					+ socket.getLocalAddress().getHostName());
+				System.out.println("Client connected");
 				
 				// Starts a thread 
 				CollectoClientHandler handler = new CollectoClientHandler(socket, this);
@@ -125,23 +125,24 @@ public class CollectoServer implements Runnable {
 	
 	/**
 	 * Put the client in queue, if there are two players in the queue.
-	 * And create a game lobby for the players and then start the game
+	 * And create a game gameSession for the players and then start the game
 	 * @param client
 	 */
 	public synchronized void putInQueue(CollectoClientHandler client) {
 		this.clientsInQueue.add(client);
+		client.setState(States.QUEUEING);
 		if (this.clientsInQueue.size() > 1) {
 			CollectoClientHandler player01 = this.clientsInQueue.get(0);
 			CollectoClientHandler player02 = this.clientsInQueue.get(1);
-			GameLobby lobby = new GameLobby(player01, player02);
+			GameSession gameSession = new GameSession(player01, player02);
+			gameSession.startGame();
 			this.clientsInQueue.remove(player01);
 			this.clientsInQueue.remove(player02);
-			lobby.startGame();
 		}
 	}
 	
 	public List<CollectoClientHandler> getClientList() {
 		return this.clients;
 	}
-	
+
 }

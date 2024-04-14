@@ -5,9 +5,6 @@ package server;
 import utils.TextIO;
 
 public class CollectoServerTUI {
-
-	/* The PrintWriter to write messages to */
-	// private PrintWriter console;
 	
 	private CollectoServer server;
 
@@ -15,7 +12,6 @@ public class CollectoServerTUI {
 	 * Constructs a new CollectoServerTUI. Initializes the console.
 	 */
 	public CollectoServerTUI() {
-		// console = new PrintWriter(System.out, true);
 		this.server = new CollectoServer();
 	}
 	
@@ -25,12 +21,6 @@ public class CollectoServerTUI {
 		this.server.setPort(port);
 		this.server.run();
 	}
-
-	/*
-	public void showMessage(String message) {
-		console.println(message);
-	}
-	*/
 
 	/* Start a new CollectoServer */
 	public static void main(String[] args) {
