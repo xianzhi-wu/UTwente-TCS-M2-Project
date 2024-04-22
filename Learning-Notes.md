@@ -357,4 +357,22 @@ Inheritance is beneficial for code reusability, allowing you to utilize attribut
 Polymorphism means "having many forms".\
 Inheritance enables us inherit attributes and methods from another class, while Polymorphism uses those methods to perform different tasks. (Polymorphism enables the execution of a single action in different ways.)
 
+## [12. Abstraction](https://www.w3schools.com/java/java_abstract.asp)
+Data abstraction is the process of hiding certain details and only showing important information to the user. Abstraction can be achieved with either abstract classes or interfaces.
+
+The abstract keyword is a non-access modifier used for classes and methods:\
+***Abstract Class***: A restricted class that cannot be instantiated on its own and must be inherited from another class to be used.
+***Abstract Method***: A method declared in an abstract class that lacks implementation details and must be overridden by subclasses.
+An abstract class can contain both abstract and regular methods:
+
+```ts
+abstract class Animal {
+    public abstract void animalSound();
+    
+    public void sleep() {
+        System.out.println("Zzz");
+    }
+}
+```
+
 
