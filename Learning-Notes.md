@@ -78,7 +78,7 @@ public class Example {
 // Outputs 5
 ```
 
-## [Modifiers](https://www.w3schools.com/java/java_modifiers.asp)
+## [7. Modifiers](https://www.w3schools.com/java/java_modifiers.asp)
 Modifiers in Java are categorized into two groups:
 
 **- Access Modifiers**: regulate the access level.
@@ -97,7 +97,7 @@ For attributes, methods, and constructors, the following modifiers can be applie
 
 For classes, you can apply either final or abstract:\
 ***final***: Prevents the class from being inherited by other classes.\
-***abstract***:  cannot be used to create objects. To utilize an abstract class, it must be inherited from another class.
+***abstract***:  Cannot be used to create objects. To utilize an abstract class, it must be inherited from another class.
 
 For attributes and methods, the following modifiers are available:\
 ***final***: Attributes and methods cannot be overridden or modified.\
@@ -111,6 +111,65 @@ For attributes and methods, the following modifiers are available:\
 ***Visibility***: Visibility refers to the guarantee that changes made by one thread to shared data are visible to other threads.\
 ***Atomicity***: Atomicity refers to the guarantee that an operation on shared data will either fully execute or not execute at all, without being interrupted by another thread.
 
+**static**\
+Unlike public, a static can be accessed without creating an object of the class.\
+Here is an example to demonstrate the differences between static and public methods:
+
+```ts
+public class Example {
+  // Static method
+  static void myStaticMethod() {
+    System.out.println("Static methods can be called without creating objects");
+  }
+
+  // Public method
+  public void myPublicMethod() {
+    System.out.println("Public methods must be called by creating objects");
+  }
+
+  public static void main(String[ ] args) {
+    myStaticMethod(); // Call the static method
+    // myPublicMethod(); This would output an error
+
+    Example myExample = new Example(); // Create an object of Example
+    myExample.myPublicMethod(); // Call the public method
+  }
+}
+```
+
+**abstract**\
+An abstract method belongs to an abstract class, and it does not have a body. The body is provided by the subclass.
+
+```ts
+// abstract class
+abstract class Person {
+  public String fname = "Xianzhi";
+  public int age = 24;
+  public abstract void study(); // abstract method
+}
+
+// Subclass (inherit from Person)
+class Student extends Person {
+  public int graduationYear = 2023;
+  public void study() { // the body of the abstract method is provided here
+    System.out.println("Studying CS all day long");
+  }
+}
+
+class Main {
+  public static void main(String[] args) {
+    // create an object of the Student class (which inherits attributes and methods from Person)
+    Student student = new Student();
+
+    System.out.println("Name: " + student.fname);
+    System.out.println("Age: " + student.age);
+    System.out.println("Graduation Year: " + student.graduationYear);
+    student.study(); // call abstract method
+  }
+}
+```
+
+**transient**\
 Here's an example showing how you might serialize and deserialize a User object, while the password field, marked as **transient**, is excluded from serialization:
 
 ```ts
