@@ -237,10 +237,12 @@ public class User implements Serializable {
 }
 ```
 
-## [8. Encapsulation](https://www.w3schools.com/java/java_encapsulation.asp)
-[Encapsulation](https://docs.oracle.com/en/database/oracle/oracle-database/19/jjdev/Java-overview.html#GUID-68EE1A7B-1F78-4074-AB76-AF9B2CE878F6) describes the ability of an object to hide its data and methods from the rest of the world and is one of the fundamental principles of object-oriented programming. In Java, a class encapsulates the fields, which hold the state of an object, and the methods, which define the actions of the object. 
+## 8. Encapsulation
+[Encapsulation*](https://docs.oracle.com/en/database/oracle/oracle-database/19/jjdev/Java-overview.html#GUID-68EE1A7B-1F78-4074-AB76-AF9B2CE878F6) (from Java Developer's Guide by Oracle) describes the ability of an object to hide its data and methods from the rest of the world and is one of the fundamental principles of object-oriented programming. In Java, a class encapsulates the fields, which hold the state of an object, and the methods, which define the actions of the object. 
 
-Encapsulation ensures that sensitive data is hidden from users by:
+
+
+[Encapsulation*](https://www.w3schools.com/java/java_encapsulation.asp) (From w3schools) ensures that sensitive data is hidden from users by:
 1. Declaring class variables/attributes as private.
 2. Providing public getter and setter methods to access and update the value of private variables.
 
