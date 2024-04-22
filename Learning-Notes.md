@@ -310,4 +310,8 @@ public class BankAccount {
 
 The BankAccount class encapsulates the balance attribute with private access and provides methods to deposit and withdraw money. Validation logic ensures that only valid transactions are processed, enhancing the security of the account data.
 
+## [9. Java Packages & API](https://www.w3schools.com/java/java_packages.asp)
+A package is used to organize related classes, akin to a folder in a file directory. It helps prevent name conflicts and promotes maintainable code. There are two types of packages:
+1. Built-in Packages (packages from the Java API)
+2. User-defined Packages (created by developers)
 
