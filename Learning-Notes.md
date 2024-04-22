@@ -237,4 +237,77 @@ public class User implements Serializable {
 }
 ```
 
+## [8. Encapsulation](https://www.w3schools.com/java/java_encapsulation.asp)
+Encapsulation ensures that sensitive data is hidden from users by:
+1. Declaring class variables/attributes as private.
+2. Providing public getter and setter methods to access and update the value of private variables.
+
+**Get and Set**\
+Public getter and setter methods to access and modify private variables.\
+The "get" method retrieves the variable value, while the "set" method assigns a new value to the variable.
+```ts
+// Encapsulated class with private attribute and public methods
+public class Circle {
+    private double radius;
+
+    // Getter method
+    public double getRadius() {
+        return radius;
+    }
+
+    // Setter method
+    public void setRadius(double radius) {
+        this.radius = radius;
+    }
+}
+```
+
+**Why Encapsulation?**
+1. Enhanced Control: Encapsulation provides precise control over class attributes and methods, allowing developers to manage their accessibility and behavior effectively. Class attributes can be made read-only (if you only use the get method), or write-only (if you only use the set method).
+
+The Circle class (the above example) encapsulates the radius attribute with private access and provides public getter and setter methods to control access to it.
+
+2. Flexibility: Encapsulation enables modular code, allowing changes in one part without affecting others. Modifying internal implementation is easier, maintaining separation of concerns.
+
+```ts
+// Encapsulated class with private attribute and public method
+public class TemperatureConverter {
+    private double temperature;
+
+    // Method to convert Celsius to Fahrenheit
+    public double convertCelsiusToFahrenheit() {
+        return (temperature * 9 / 5) + 32;
+    }
+}
+```
+
+The TemperatureConverter class encapsulates the temperature attribute with private access and provides a method to convert Celsius to Fahrenheit. If the internal logic for conversion changes, it can be modified within this method without affecting other parts of the code.
+
+3. Increased Security of Data: By controlling access to class attributes, encapsulation prevents direct manipulation, enforcing validation rules and data consistency. This reduces the risk of unintended data corruption.
+
+```ts
+// Encapsulated class with private attribute and public methods
+public class BankAccount {
+    private double balance;
+
+    // Method to deposit money
+    public void deposit(double amount) {
+        // Add validation logic
+        if (amount > 0) {
+            balance += amount;
+        }
+    }
+
+    // Method to withdraw money
+    public void withdraw(double amount) {
+        // Add validation logic
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+        }
+    }
+}
+```
+
+The BankAccount class encapsulates the balance attribute with private access and provides methods to deposit and withdraw money. Validation logic ensures that only valid transactions are processed, enhancing the security of the account data.
+
 
