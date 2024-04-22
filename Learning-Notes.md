@@ -353,4 +353,8 @@ Inheritance is beneficial for code reusability, allowing you to utilize attribut
 
 **Note**: To prevent other classes from inheriting from a class, you can use the final keyword.
 
+## [11. Polymorphism](https://www.geeksforgeeks.org/polymorphism-in-java/)
+Polymorphism means "having many forms".\
+Inheritance enables us inherit attributes and methods from another class, while Polymorphism uses those methods to perform different tasks. (Polymorphism enables the execution of a single action in different ways.)
+
 
