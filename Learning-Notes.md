@@ -315,3 +315,42 @@ A package is used to organize related classes, akin to a folder in a file direct
 1. Built-in Packages (packages from the Java API)
 2. User-defined Packages (created by developers)
 
+## [10. Inheritance](https://www.w3schools.com/java/java_inheritance.asp)
+In Java, we can inherit attributes and methods from one class to another. This concept is categorized into:
+
+Subclass (Child): The class that inherits from another class.\
+Superclass (Parent): The class being inherited from.
+
+To inherit from a class, the extends keyword is used.\
+In the following example, the Car class (subclass) inherits the attributes and methods from the Vehicle class (superclass):
+
+```ts
+class Vehicle {
+  protected String brand = "Ford";        // Vehicle attribute
+  public void honk() {                    // Vehicle method
+    System.out.println("Tuut, tuut!");
+  }
+}
+
+class Car extends Vehicle {
+  private String modelName = "Mustang";    // Car attribute
+  public static void main(String[] args) {
+
+    // Create a myCar object
+    Car myCar = new Car();
+
+    // Call the honk() method (from the Vehicle class) on the myCar object
+    myCar.honk();
+
+    // Display the value of the brand attribute (from the Vehicle class) and the value of the modelName from the Car class
+    System.out.println(myCar.brand + " " + myCar.modelName);
+  }
+}
+```
+
+**Why And When To Use "Inheritance"?**\
+Inheritance is beneficial for code reusability, allowing you to utilize attributes and methods from an existing class when creating a new class.
+
+**Note**: To prevent other classes from inheriting from a class, you can use the final keyword.
+
+
