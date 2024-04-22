@@ -11,7 +11,7 @@ Contrary to procedural programming, where procedures or functions manipulate dat
 **Reusability**: **OOP** facilitates the creation of reusable components, leading to shorter development times and less code duplication.
 
 ## [2. What are Classes and Objects?](https://www.w3schools.com/java/java_oop.asp) 
-A class is a template for objects, and an object is an instance of a class. \
+A class is a template for objects that share common characteristics, and an object is an instance of a class. \
 **Example**:\
 class: Fruit \
 objects: Banana, Apple, Mango 
@@ -238,6 +238,8 @@ public class User implements Serializable {
 ```
 
 ## [8. Encapsulation](https://www.w3schools.com/java/java_encapsulation.asp)
+[Encapsulation](https://docs.oracle.com/en/database/oracle/oracle-database/19/jjdev/Java-overview.html#GUID-68EE1A7B-1F78-4074-AB76-AF9B2CE878F6) describes the ability of an object to hide its data and methods from the rest of the world and is one of the fundamental principles of object-oriented programming. In Java, a class encapsulates the fields, which hold the state of an object, and the methods, which define the actions of the object. 
+
 Encapsulation ensures that sensitive data is hidden from users by:
 1. Declaring class variables/attributes as private.
 2. Providing public getter and setter methods to access and update the value of private variables.
