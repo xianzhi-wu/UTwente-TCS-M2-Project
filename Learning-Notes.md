@@ -365,7 +365,7 @@ Inheritance enables us inherit attributes and methods from another class, while 
 Data abstraction is the process of hiding certain details and only showing important information to the user. Abstraction can be achieved with either abstract classes or interfaces.
 
 The abstract keyword is a non-access modifier used for classes and methods:\
-***Abstract Class***: A restricted class that cannot be instantiated on its own and must be inherited from another class to be used.
+***Abstract Class***: A restricted class that cannot be instantiated on its own and must be inherited from another class to be used.\
 ***Abstract Method***: A method declared in an abstract class that lacks implementation details and must be overridden by subclasses.
 An abstract class can contain both abstract and regular methods:
 
@@ -378,5 +378,104 @@ abstract class Animal {
     }
 }
 ```
+
+## [13. Interface](https://www.w3schools.com/java/java_interface.asp)
+An interface is a completely "abstract class" that is used to group related methods with empty bodies (without implmentation).\
+To use the methods defined in an interface, another class must implement it using the "implements" keyword (instead of 'extends'). The implementing class then provides the implementation for the interface methods.
+
+```ts
+interface Identity {
+    String getName();
+    int getAge();
+}
+
+class Person implements Identity {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getAge() {
+        return age;
+    }
+
+    // Other methods and properties specific to a person
+}
+```
+
+**Notes** on interfaces:\
+* An interface does not contain a constructor so it cannot be used to create objects.
+* Interface methods do not have a body so the body is provided (implemented) by the class that 'implements' it.
+* When implementing an interface, all its methods must be overrided.
+* Interface methods are abstract and public by default.
+* Interface attributes are public, static and final by default.
+
+***Java doesn't support "multiple inheritance," where a class inherits from more than one superclass. However, it can achieve similar functionality through interfaces. A class can implement multiple interfaces by listing them separated by commas.***
+
+```ts
+interface Identity {
+    String getName();
+    int getAge();
+}
+
+interface Employment {
+    void hire();
+    void fire();
+}
+
+class Person implements Identity, Employment {
+    private String name;
+    private int age;
+    private boolean employed;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+        this.employed = false; // Initially not employed
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getAge() {
+        return age;
+    }
+
+    @Override
+    public void hire() {
+        if (!employed) {
+            employed = true;
+            System.out.println(name + " has been hired.");
+        } else {
+            System.out.println(name + " is already employed.");
+        }
+    }
+
+    @Override
+    public void fire() {
+        if (employed) {
+            employed = false;
+            System.out.println(name + " has been fired.");
+        } else {
+            System.out.println(name + " is not currently employed.");
+        }
+    }
+
+    // Other methods and properties specific to a person
+}
+```
+
 
 
