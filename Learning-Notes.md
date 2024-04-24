@@ -585,7 +585,7 @@ On most systems, time slicing happens unpredictably and nondeterministically, me
 A race condition means that the correctness of the program (the satisfaction of postconditions and invariants) depends on the relative timing of events in concurrent computations A and B. When this happens, we say “A is in a race with B.”
 
 
-Source: MIT 6.031 course reading 20: Concurrency. [https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/](https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/)
+Source: MIT 6.031 Software Construction course reading 20 - Concurrency. [https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/](https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/)
 
 ---
 # Locks and Synchronization
@@ -633,7 +633,7 @@ Deadlock occurs when concurrent modules are stuck waiting for each other to do s
 ***Deadlock solution 1: lock ordering***
 ***Deadlock solution 2: coarse-grained locking**
 
-Source: MIT 6.031 course reading 22: Locks and Synchronization. [https://web.mit.edu/6.031/www/sp21/classes/22-locks/](https://web.mit.edu/6.031/www/sp21/classes/22-locks/)
+Source: MIT 6.031 Software Construction course reading 22 - Locks and Synchronization. [https://web.mit.edu/6.031/www/sp21/classes/22-locks/](https://web.mit.edu/6.031/www/sp21/classes/22-locks/)
 
 ---
 # Sockets & Networking
@@ -647,20 +647,20 @@ Many Internet applications work this way: web browsers are clients for web serve
 ## 2. Sockets and streams
 There are some important concepts related to network communication, and to input/output in general. Input/output (I/O) refers to communication into and out of a process – perhaps over a network, or to/from a file, or with the user on the command line or a graphical user interface.
 
-**[IP addresses](https://en.wikipedia.org/wiki/IP_address)**\
+**[2.1. IP addresses](https://en.wikipedia.org/wiki/IP_address)**\
 A network interface is identified by an IP address. 
 
-**[Hostnames](https://en.wikipedia.org/wiki/Hostname)**\
+**[2.2. Hostnames](https://en.wikipedia.org/wiki/Hostname)**\
 Hostnames are names that can be translated into IP addresses. A single hostname can map to different IP addresses at different times; and multiple hostnames can map to the same IP address.
 
-**[Port](https://en.wikipedia.org/wiki/Port_(computer_networking)) numbers**\
+**[2.3. Port](https://en.wikipedia.org/wiki/Port_(computer_networking)) numbers**\
 A single machine might have multiple server applications that clients wish to connect to, so we need a way to direct traffic on the same network interface to different processes.
 
 Network interfaces have multiple ports identified by a 16-bit number. Port 0 is reserved, so port numbers effectively run from 1 to 65535.
 
 A server process binds to a particular port — it is now listening on that port. A port can have only one listener at a time, so if some other server process tries to listen to the same port, it will fail.
 
-**Network sockets**\
+**2.4. Network sockets**\
 A [socket](https://en.wikipedia.org/wiki/Network_socket) represents one end of the connection between client and server.
 
 A ***listening socket*** is used by a server process to wait for connections from remote clients.\
@@ -669,6 +669,44 @@ In Java, use [ServerSocket](https://docs.oracle.com/en/java/javase/15/docs/api/j
 A ***connected socket*** can send and receive messages to and from the process on the other end of the connection.\
 In Java, clients use a [Socket](https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/net/Socket.html) constructor to establish a socket connection to a server. Servers obtain a connected socket as a Socket object returned from ServerSocket.accept.
 
-## 3. Buffers
-The data that clients and servers exchange over the network is sent in chunks.
+**2.5. Buffers**\
+The data that clients and servers exchange over the network is sent in chunks.\
+The network chops that chunk up into packets, and each packet is routed separately over the network. At the other end, the receiver reassembles the packets together into a stream of bytes.\
+When data arrive, they go into a buffer, an array in memory that holds the data until you read it.
+
+**2.6. Byte streams**\
+The data going into or coming out of a socket is a stream of bytes.
+
+In Java, InputStream objects represent sources of data flowing into your program. For example:
+* User input from System.in
+* Input from a network socket
+  
+OutputStream objects represent data sinks, places we can write data to. For example:
+* System.out for normal output to the user
+* System.err for error output
+* Output to a network socket
+
+**2.7. Character streams**\
+The stream of bytes provided by InputStream and OutputStream is often too low-level to be useful. We may need to interpret the stream of bytes as a stream of Unicode characters, because Unicode can represent a wide variety of human languages (not to mention emoji). A String is a sequence of Unicode characters, not a sequence of bytes, so if we want to use strings to manipulate the data inside our program, then we need to convert incoming bytes into Unicode, and convert Unicode back to bytes when we write it out.
+
+In Java, Reader and Writer represent incoming and outgoing streams of Unicode characters. For example, the wrappers InputStreamReader and OutputStreamWriter adapt a byte stream into a character stream.
+
+**2.8. Blocking**\
+Input/output streams exhibit blocking behavior. For example, for socket streams:
+* When an incoming socket’s buffer is empty, calling read blocks until data are available.
+* When the destination socket’s buffer is full, calling write blocks until space is available.
+
+## [3. Using network sockets in Java (Example)](https://web.mit.edu/6.031/www/sp21/classes/24-sockets-networking/#using_network_sockets_in_java)
+* readLine() returns null if the stream it is reading from has been closed by the other side. For a socket stream, this would indicate that the server has closed its side of the connection.
+* The message content isn’t sent to the server until the buffer fills up or the client closes its side of the connection. So it’s critically important to flush the buffers after writing, forcing all buffer contents to be sent.
+
+## 4. Wire protocols
+A **protocol** is a set of messages that can be exchanged by two communicating parties. A **wire protocol** in particular is a set of messages represented as byte sequences, like hello world and bye (assuming we’ve agreed on a way to encode those characters into bytes).
+
+Many Internet applications use simple ASCII-based wire protocols.
+* Telnet client
+* HTTP
+* SMTP
+
+Source: MIT 6.031 Software Construction course reading 24 - Sockets & Networking. [https://web.mit.edu/6.031/www/sp21/classes/24-sockets-networking/](https://web.mit.edu/6.031/www/sp21/classes/24-sockets-networking/)
 
