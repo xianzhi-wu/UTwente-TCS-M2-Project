@@ -587,4 +587,52 @@ A race condition means that the correctness of the program (the satisfaction of 
 
 Source: MIT 6.031 course reading 20: Concurrency. [https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/](https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/)
 
+---
+# Locks and Synchronization
+
+## 1. Synchronization
+The correctness of a concurrent program should not depend on accidents of timing.
+
+Since race conditions caused by concurrent manipulation of shared mutable data are disastrous bugs — hard to discover, hard to reproduce, hard to debug — we need a way for concurrent modules that share memory to **synchronize** with each other.
+
+**Locks** are one synchronization technique. A lock is an abstraction that allows at most one thread to own it at a time. Holding a lock is how one thread informs other threads: “I’m working with this thing, don’t touch it right now.”
+
+Locks have two operations:
+
+**acquire** allows a thread to take ownership of a lock. If a thread tries to acquire a lock currently owned by another thread, it blocks until the other thread releases the lock. At that point, it will contend with any other threads that are trying to acquire the lock. At most one thread can own the lock at a time.
+
+**release** relinquishes ownership of the lock, allowing another thread to take ownership of it.
+
+Using a lock also tells the compiler and processor that you’re using shared memory concurrently, so that registers and caches will be written back correctly to shared storage.
+
+**Blocking means**, in general, that a thread waits (without doing further work) until an event occurs.
+
+## 2. Locking
+Locks are so commonly-used that Java provides them as a built-in language feature.
+
+In Java, every object has a lock implicitly associated with it — a String, an array, an ArrayList, and every class you create, all of their object instances have a lock. Even a humble Object has a lock, so bare Objects are often used for explicit locking:
+
+```ts
+Object lock = new Object();
+```
+
+You can’t call acquire and release on Java’s intrinsic locks, however. Instead you use the synchronized statement to acquire the lock for the duration of a statement block:
+
+```ts
+synchronized (lock) { // thread blocks here until lock is free
+    // now this thread has the lock
+    // do something
+} // exiting the block releases the lock
+```
+
+Synchronized regions like this provide **mutual exclusion**: only one thread at a time can be in a synchronized region guarded by a given object’s lock. In other words, you are back in sequential programming world, with only one thread running at a time, at least with respect to other synchronized regions that refer to the same object.
+
+## 3. [Deadlock](https://docs.oracle.com/javase/tutorial/essential/concurrency/deadlock.html)
+Deadlock occurs when concurrent modules are stuck waiting for each other to do something. A deadlock may involve more than two modules, e.g., A may be waiting for B, which is waiting for C, which is waiting for A. None of them can make progress. The essential feature of deadlock is a cycle of dependencies like this.
+
+***Deadlock solution 1: lock ordering***
+***Deadlock solution 2: coarse-grained locking**
+
+Source: MIT 6.031 course reading 22: Locks and Synchronization. [https://web.mit.edu/6.031/www/sp21/classes/22-locks/](https://web.mit.edu/6.031/www/sp21/classes/22-locks/)
+
 
