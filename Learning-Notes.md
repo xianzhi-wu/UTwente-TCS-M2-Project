@@ -555,5 +555,7 @@ Unlike a class, an enum cannot be used to create objects, and it cannot extend o
 ***Why And When To Use Enums?***
 Use enums when you have values that you aren't going to change, like days of the week, months, colors, etc.
 
+---
+
 
 
