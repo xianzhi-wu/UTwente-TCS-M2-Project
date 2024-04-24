@@ -635,4 +635,40 @@ Deadlock occurs when concurrent modules are stuck waiting for each other to do s
 
 Source: MIT 6.031 course reading 22: Locks and Synchronization. [https://web.mit.edu/6.031/www/sp21/classes/22-locks/](https://web.mit.edu/6.031/www/sp21/classes/22-locks/)
 
+---
+# Sockets & Networking
+
+## 1. Client/server design pattern
+The client/server design pattern is used for communication with message passing.
+In this pattern there are two kinds of processes: clients and servers. A client initiates the communication by connecting to a server. The client sends requests to the server, and the server sends replies back. Finally, the client disconnects. A server might handle connections from many clients concurrently, and clients might also connect to multiple servers.
+
+Many Internet applications work this way: web browsers are clients for web servers, an email program like Outlook is a client for a mail server, etc.
+
+## 2. Sockets and streams
+There are some important concepts related to network communication, and to input/output in general. Input/output (I/O) refers to communication into and out of a process – perhaps over a network, or to/from a file, or with the user on the command line or a graphical user interface.
+
+**[IP addresses](https://en.wikipedia.org/wiki/IP_address)**\
+A network interface is identified by an IP address. 
+
+**[Hostnames](https://en.wikipedia.org/wiki/Hostname)**\
+Hostnames are names that can be translated into IP addresses. A single hostname can map to different IP addresses at different times; and multiple hostnames can map to the same IP address.
+
+**[Port](https://en.wikipedia.org/wiki/Port_(computer_networking)) numbers**\
+A single machine might have multiple server applications that clients wish to connect to, so we need a way to direct traffic on the same network interface to different processes.
+
+Network interfaces have multiple ports identified by a 16-bit number. Port 0 is reserved, so port numbers effectively run from 1 to 65535.
+
+A server process binds to a particular port — it is now listening on that port. A port can have only one listener at a time, so if some other server process tries to listen to the same port, it will fail.
+
+**Network sockets**\
+A [socket](https://en.wikipedia.org/wiki/Network_socket) represents one end of the connection between client and server.
+
+A ***listening socket*** is used by a server process to wait for connections from remote clients.\
+In Java, use [ServerSocket](https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/net/ServerSocket.html) to make a listening socket, and use its [accept](https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/net/ServerSocket.html#accept()) method to listen to it. Remember that a port can only have one listener, so this will fail if another thread or process is currently listening at the same port.
+
+A ***connected socket*** can send and receive messages to and from the process on the other end of the connection.\
+In Java, clients use a [Socket](https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/net/Socket.html) constructor to establish a socket connection to a server. Servers obtain a connected socket as a Socket object returned from ServerSocket.accept.
+
+## 3. Buffers
+The data that clients and servers exchange over the network is sent in chunks.
 
