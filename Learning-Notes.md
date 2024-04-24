@@ -556,6 +556,35 @@ Unlike a class, an enum cannot be used to create objects, and it cannot extend o
 Use enums when you have values that you aren't going to change, like days of the week, months, colors, etc.
 
 ---
+# [Concurrency](https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/)
 
+## 1. Concurrency
+**Concurrency** means multiple computations are happening at the same time. (multiple computations running simultaneously)
+
+Concurrency is essential in modern programming:
+* Web sites must handle multiple simultaneous users.
+* Mobile apps need to do some of their processing on servers (“in the cloud”).
+
+## 2. Two models for concurrent programming
+There are two common models for concurrent programming: shared memory and message passing.
+
+***Shared memory***. In the shared memory model of concurrency, concurrent modules interact by reading and writing shared objects in memory. \
+***Message passing***. In the message-passing model, concurrent modules interact by sending messages to each other through a communication channel. Modules send off messages, and incoming messages to each module are queued up for handling.
+
+## 3. Processes, threads, time-slicing
+The message-passing and shared-memory models are about how concurrent modules communicate. The concurrent modules themselves come in two different kinds: processes and threads.
+
+**Process**. A process is an instance of a running program that is isolated from other processes on the same machine. In particular, it has its own private section of the machine’s memory.
+
+**Thread**. A thread is a locus of control inside a running program. 
+
+**Time slicing**. How can you have many concurrent threads with only one or two processors in your computer? When there are more threads than processors, concurrency is simulated by time slicing, which means that the processor switches between threads. \
+On most systems, time slicing happens unpredictably and nondeterministically, meaning that a thread may be paused or resumed at any time.
+
+## 4. Race condition
+A race condition means that the correctness of the program (the satisfaction of postconditions and invariants) depends on the relative timing of events in concurrent computations A and B. When this happens, we say “A is in a race with B.”
+
+
+Source: MIT 6.031 course reading 20: Concurrency. [https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/](https://web.mit.edu/6.031/www/sp21/classes/20-concurrency/)
 
 
