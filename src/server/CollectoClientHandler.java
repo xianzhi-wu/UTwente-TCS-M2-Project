@@ -5,9 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.ConnectException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +15,8 @@ import collecto.NaiveStrategy;
 import collecto.Player;
 import utils.Protocols;
 import utils.States;
+
+import utils.MessageHandler;
 
 public class CollectoClientHandler extends Player 
 								   implements Runnable, Comparable<CollectoClientHandler> {
@@ -51,12 +51,12 @@ public class CollectoClientHandler extends Player
 				handleCommand(msg);
 				msg = in.readLine();
 			}
-
+			 
 			if (!state.equals(States.QUITED) && msg == null) {
 				handleQuit();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			MessageHandler.handleError(e);
 		}
 	}
 
@@ -157,10 +157,7 @@ public class CollectoClientHandler extends Player
 	 */
 	private void handleQuit() throws IOException {
 		try {
-			in.close();
-			out.close();
-			socket.close();
-			System.out.println("Player " + this.getName() + "(" + state + ") disconnected!");
+			MessageHandler.printMessage("Player " + this.getName() + "(" + state + ") disconnected!");
 
 			if (state.equals(States.QUEUEING)) {
 				server.removeClientInQueue(this);
@@ -172,8 +169,11 @@ public class CollectoClientHandler extends Player
 
 			server.removeClient(this);
 			state = States.QUITED;
-		} catch (IOException e) {
-			e.printStackTrace();
+			in.close();
+			out.close();
+			socket.close();
+		} catch (Exception e) {
+			MessageHandler.handleError(e);
 		}
 	}
 
@@ -241,12 +241,6 @@ public class CollectoClientHandler extends Player
 	public String determineMove(Board board) {
 		return new NaiveStrategy().determineMove(board);
 	}
-
-	/*
-	@Override
-	public void makeMove(Board baord, String move) {
-
-	}*/
 	
 	/**
 	 * Start the game and send a message containing the board, players' names to both players.
@@ -259,7 +253,7 @@ public class CollectoClientHandler extends Player
 			state = States.PLAYING;
 			sendMessage(initStr);
 		} catch (IOException e) {
-			e.printStackTrace();
+			MessageHandler.handleError(e);
 		}
 	}
 

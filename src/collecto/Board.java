@@ -15,6 +15,7 @@ public class Board {
 	public static final int EACH = 8; // Number of each color
 	public static final int MINMOVE = 0; // Minimum number of possible move
 	public static final int MAXMOVE = 27; // Maximum number of possible move
+	
 	private Colors[][] fields; // 2D array representing the board fields
 
 	/**

@@ -92,7 +92,6 @@ public class GameSession {
      * which player plays first is random.
      */
 	public synchronized void startGame() {
-		System.out.println("Start game");
 		current = (int) (Math.random() * 2);
 
 		CollectoClientHandler player01 = players[current];

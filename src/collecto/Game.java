@@ -1,6 +1,7 @@
 package collecto;
 
 import utils.TextIO;
+import utils.MessageHandler;
 
 public class Game {
     
@@ -48,7 +49,7 @@ public class Game {
         boolean continueGame = true;
         while (continueGame) {
             play();
-            System.out.println("\n> Play again? (y/n)");
+            MessageHandler.printMessage("\n> Play again? (y/n)");
             continueGame = TextIO.getBoolean();
             reset();
         }
@@ -96,12 +97,16 @@ public class Game {
      * Prints the game situation.
      */
     private void update() {
-        System.out.println("\nCurrent game situation:");
-    	System.out.printf("%s has %d point(s). %s\n", players[0].getName(), 
-    		players[0].getScore(), players[0].getColorMap());
-    	System.out.printf("%s has %d point(s). %s\n\n", players[1].getName(), 
-    		players[1].getScore(), players[1].getColorMap());
-    	System.out.println(board.toString());
+        MessageHandler.printMessage("\nCurrent game situation:");
+        for (int i = 0; i < NUMBER_PLAYERS; i++) {
+            MessageHandler.printMessage(
+            String.format("%s has %d point(s). %s\n", 
+                          players[i].getName(), 
+                          players[i].getScore(), 
+                          players[i].getColorMap())
+            );
+        }
+        MessageHandler.printMessage(board.toString());
     }
 
     /**
@@ -109,15 +114,20 @@ public class Game {
      * @requires the game to be over
      */
     private void printResult() {
+        String result = null;
     	if (players[0].getScore() > players[1].getScore()) {
-    		System.out.printf("%s is the winner. The score is %d.\n", players[0]
-    			.getName(), players[0].getScore());
+            result = String.format("%s is the winner. The score is %d.\n", 
+                                   players[0].getName(), 
+                                   players[0].getScore());
     	} else if (players[0].getScore() < players[1].getScore()) {
-    		System.out.printf("%s is the winner. The score is %d.\n", players[1]
-    			.getName(), players[1].getScore());
+    		result = String.format("%s is the winner. The score is %d.\n", 
+                                   players[1].getName(), 
+                                   players[1].getScore());
     	} else {
-    		System.out.printf("Draw. Got the same score %d\n", players[0].getScore());
+    		result = String.format("Draw. Got the same score %d\n", 
+                                   players[0].getScore());
     	}
+        MessageHandler.printMessage(result);
     }
 
 }

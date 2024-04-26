@@ -9,6 +9,7 @@ import java.util.List;
 
 import utils.Protocols;
 import utils.States;
+import utils.MessageHandler;
 
 public class CollectoServer implements Runnable {
 
@@ -42,14 +43,16 @@ public class CollectoServer implements Runnable {
 			this.setup();
 			while (true) {
 				Socket socket = this.ssock.accept();
-				System.out.println("Client connected");
+				MessageHandler.printMessage("Client connected");
 				
 				// Starts a thread 
 				CollectoClientHandler handler = new CollectoClientHandler(socket, this);
 				new Thread(handler).start();
 			}
 		} catch (IOException e) {
-			System.out.println("A server IO error occurred: " + e.getMessage());
+			MessageHandler.handleError(e, "A server IO error occurred");
+		} catch (Exception e) {
+			MessageHandler.handleError(e);
 		}
 	}
 	
@@ -63,7 +66,6 @@ public class CollectoServer implements Runnable {
 	 * 
 	 * The user is asked to input a port, after which a socket is attempted 
 	 * to be opened. If the attempt succeeds, the method ends.
-	 * 
 	 * @ensures a serverSocket is opened.
 	 */
 	public void setup() {
@@ -71,11 +73,11 @@ public class CollectoServer implements Runnable {
 		while (this.ssock == null) {
 			// try to open a new ServerSocket
 			try {
-				System.out.println("Attempting to open a socket on port " + this.port + "...");
+				MessageHandler.printMessage("Attempting to open a socket on port " + this.port + "...");
 				this.ssock = new ServerSocket(this.port);
-				System.out.println("Server started on port " + port);
+				MessageHandler.printMessage("Server started on port " + port);
 			} catch (Exception e) {
-				e.printStackTrace();
+				MessageHandler.handleError(e);
 			}
 		}
 	}
