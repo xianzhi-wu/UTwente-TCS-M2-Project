@@ -412,7 +412,7 @@ class Person implements Identity {
 }
 ```
 
-**Notes** on interfaces:\
+**Notes** on interfaces:
 * An interface does not contain a constructor so it cannot be used to create objects.
 * Interface methods do not have a body so the body is provided (implemented) by the class that 'implements' it.
 * When implementing an interface, all its methods must be overrided.
