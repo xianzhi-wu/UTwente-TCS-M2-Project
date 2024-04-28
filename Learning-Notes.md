@@ -630,7 +630,7 @@ Synchronized regions like this provide **mutual exclusion**: only one thread at 
 ## 3. [Deadlock](https://docs.oracle.com/javase/tutorial/essential/concurrency/deadlock.html)
 Deadlock occurs when concurrent modules are stuck waiting for each other to do something. A deadlock may involve more than two modules, e.g., A may be waiting for B, which is waiting for C, which is waiting for A. None of them can make progress. The essential feature of deadlock is a cycle of dependencies like this.
 
-***Deadlock solution 1: lock ordering***
+***Deadlock solution 1: lock ordering***\
 ***Deadlock solution 2: coarse-grained locking**
 
 Source: MIT 6.031 Software Construction course reading 22 - Locks and Synchronization. [https://web.mit.edu/6.031/www/sp21/classes/22-locks/](https://web.mit.edu/6.031/www/sp21/classes/22-locks/)
