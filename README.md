@@ -1,4 +1,4 @@
-## Developed a [Collect board game](https://boardgamegeek.com/boardgame/260926/collecto) using Client/server design pattern in Java using:
+## Developed a [<ins>Collect board game</ins>](https://boardgamegeek.com/boardgame/260926/collecto) using Client/server design pattern in Java using:
 
 OOP programming paradigm: Class & Object, Abstraction, Encapsulation, Inheritance, Polymorphism, interface, enum,\
 Locks & Synchronization for Concurrency management, Sockets & Networking, Exception handling and jUnit testing.
@@ -17,6 +17,10 @@ Next, perform a handshake with the server by entering 'HELLO~[some description]'
 After the handshake, log in to the system by entering 'LOGIN~[your name]'. Once logged in, enter 'QUEUE' to wait for the game to start.
 
 Once there are at least two players in the queue, a game session will commence.
+
+To move the balls, you'll use the 'MOVE~[number]' command, where [number] corresponds to the row or column containing the balls you want to move.
+
+Wire protocols such as HELLO, LOGIN, QUEUE, and MOVE are use to establish communication and interact with the game server.
 
 
 
