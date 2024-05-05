@@ -1,4 +1,4 @@
-## Developed a [<ins>Collect board game</ins>](https://boardgamegeek.com/boardgame/260926/collecto) using Client/server design pattern in Java using:
+## A [<ins>Collect board game</ins>](https://boardgamegeek.com/boardgame/260926/collecto) using Client/server design pattern in Java using:
 
 OOP programming paradigm: Class & Object, Abstraction, Encapsulation, Inheritance, Polymorphism, interface, enum,\
 Locks & Synchronization for Concurrency management, Sockets & Networking, Exception handling and jUnit testing.
