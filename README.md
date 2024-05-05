@@ -18,7 +18,9 @@ After the handshake, log in to the system by entering 'LOGIN~[your name]'. Once 
 
 Once there are at least two players in the queue, a game session will commence.
 
-To move the balls, you'll use the 'MOVE~[number]' command, where [number] corresponds to the row or column containing the balls you want to move.
+To move the balls, you'll use the 'MOVE~[number]' command, where [number] corresponds to the row or column containing the balls you want to move. 
+
+You can use 'HINT' to receive a hint for making next move.
 
 Wire protocols such as HELLO, LOGIN, QUEUE, and MOVE are use to establish communication and interact with the game server.
 
