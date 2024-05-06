@@ -18,7 +18,7 @@ public class CollectoClientTUI {
 		this.client = new CollectoClient();
 	}
 
-	public void setUp() {
+	public void connectServer() throws ServerUnavailableException {
 		System.out.print("Input server address for client: ");
 		String host = TextIO.getlnString();
 
@@ -26,6 +26,7 @@ public class CollectoClientTUI {
 		int port = TextIO.getlnInt();
 
 		this.client.setUp(host, port);
+		this.client.createConnection();
 	}
 	
 	public void setPlayerType() {
@@ -65,14 +66,12 @@ public class CollectoClientTUI {
 	 * @throws ServerUnavailableException 
 	 */
 	public void start() throws ServerUnavailableException {
-		this.setUp();
-		if (this.client.createConnection()) {
-			this.setPlayerType();
-			this.handleHello();
-			this.handleLogin();
-			this.printHelpMenu();
-			this.getUserInput();
-		}
+		this.connectServer();
+		this.setPlayerType();
+		this.handleHello();
+		this.handleLogin();
+		this.printHelpMenu();
+		this.getUserInput();
 	}
 
 	public void handleMove(String input) throws ServerUnavailableException {

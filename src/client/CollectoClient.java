@@ -77,9 +77,10 @@ public class CollectoClient {
 
 	/**
 	 * Creates a connection to the server.
+	 * @throws ServerUnavailableException 
 	 * @ensures serverSock contains a valid socket connection to a server
 	 */
-	public boolean createConnection() {
+	public void createConnection() throws ServerUnavailableException {
 		clearConnection();
 		// try to open a Socket to the server
 		try {
@@ -90,11 +91,8 @@ public class CollectoClient {
 			this.out = new BufferedWriter(new OutputStreamWriter(this.serverSock.getOutputStream()));
 
 			MessageHandler.printMessage("Connected to " + addr + ":" + this.port);
-
-			return true;
 		} catch (Exception e) {
-			MessageHandler.handleError(e, "Could not create a socket on " + this.host + " and port " + this.port + ".");
-			return false;
+			throw new ServerUnavailableException(e, "Could not write to server.");
 		}
 	}
 
@@ -134,6 +132,7 @@ public class CollectoClient {
 		try {
 			// Read and return answer from Server
 			String answer = this.in.readLine();
+			// If the connection is closed
 			if (answer == null) {
 				throw new ServerUnavailableException("Could not read from server.");
 			}
