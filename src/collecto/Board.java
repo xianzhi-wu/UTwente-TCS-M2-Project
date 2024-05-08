@@ -1,10 +1,8 @@
 package collecto;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import utils.Colors;
 import utils.Protocols;
@@ -50,29 +48,36 @@ public class Board {
 	/**
 	 * The board is a 2D array (DIM * DIM fields).
 	 * The center field of the board is EMPTY
-	 * Initialize the board with valid colors using the Fisher-Yates algorithm
+	 * Initialize the board with valid colors using the Fisher-Yates shuffle algorithm
 	 * Apply a random arrangement of colored balls while ensuring that no adjacent balls
 	 * of the same color initially. The algorithm guarantees a solvable game state.
 	 * @ensures the board is a valid board
 	 * @returns a valid board
 	 */
 	public void init() {
+		Colors[] colors = Arrays.stream(Colors.values())
+								.filter(color -> color != Colors.EMPTY)
+								.toArray(Colors[]::new);
+
 		// Create a list containing 8*6=48 balls (8 of each color except EMPTY)
-		List<Colors> arr = new ArrayList<>();
+		Colors[] colorArr = new Colors[EACH * colors.length];
 
 		// Populate the list with balls of different colors
+		int fillIdx = 0;
 		for (int i = 0; i < EACH; i++) {
-			for (Colors color : Colors.values()) {
-				if (color == Colors.EMPTY) {
-					continue; // Skip EMPTY color
-				}
-				arr.add(color);
+			for (Colors color : colors) {
+				colorArr[fillIdx++] = color;
 			}
 		}
 
 		this.fields = new Colors[DIM][DIM];
 		this.fields[DIM / 2][DIM / 2] = Colors.EMPTY; // Set the middle field as EMPTY
 		int total = DIM * DIM;
+		int randRange = EACH * colors.length;
+		// Use a HashMap to store the count of balls that are to be filled.
+		// Key: Color of the balls
+		// Value: Number of balls of the same color that are to be filled
+		HashMap<Colors, Integer> filledColorMap = new HashMap<>();
 
 		// Iterate through each field to assign a color randomly while avoiding adjacent colors
 		for (int i = 0; i < total; i++) {
@@ -84,15 +89,15 @@ public class Board {
 				continue;
 			}
 			
-			int index = (int) (Math.random() * arr.size());
+			int index = (int) (Math.random() * randRange);
 
 			// Ensure that the color assignment adheres to the rules of the game
 			if (row == 0) {
 				// If in the first row and not in the first column, ensure it does not have the same color as the left neighbor 
 				if (col != 0) {
 					Colors left = this.fields[row][col - 1];
-					while (arr.get(index) == left) {
-						index = (int) (Math.random() * arr.size());
+					while (colorArr[index] == left) {
+						index = (int) (Math.random() * randRange);
 					}
 				}
 			} else if (row > 0) {  // If not in the first row, check the top or left neighbor for color match
@@ -100,18 +105,18 @@ public class Board {
 				if (col == 0) {
 					Colors top = this.fields[row - 1][col];
 
-					// If in the last row, ensure the only remaining color is not the color of the top neighbor. 
+					// If in the last row, ensure the only remaining color is not the same as the color of the top neighbor. 
 					// Otherwise, the initialization of the board is invalid.
 					if (row == DIM - 1) {
-						Set<Colors> set = new HashSet<>(arr);
+						HashSet<Colors> set = getRemainingColors(filledColorMap, colors);
 						if (set.size() == 1 && set.contains(top)) {
 							break;
 						}
 					}
 
 					// Ensure it does not have the same color as the top neighbor 
-					while (arr.get(index) == top) {
-						index = (int) (Math.random() * arr.size());
+					while (colorArr[index] == top) {
+						index = (int) (Math.random() * randRange);
 					}
 				} else { // If not in the first column, check the top or left neighbor
 					Colors top = this.fields[row - 1][col];
@@ -119,27 +124,49 @@ public class Board {
 
 					// If in the last two rows, ensure there are at least 2 different colors available
     				if (row == DIM - 1 || row == DIM - 2) {
-    					Set<Colors> set = new HashSet<>(arr);
+    					HashSet<Colors> set = getRemainingColors(filledColorMap, colors);
 	    				if (set.size() == 2 && set.contains(top) && set.contains(left)
-	    						|| set.size() == 1 && (set.contains(top) || set.contains(left))) {
+							|| set.size() == 1 && (set.contains(top) || set.contains(left))) {
 	    					break;
 	    				}
     				}
 
 					// Ensure it does not have the same color as the top neighbor or the left neighbor.
-					while (arr.get(index) == top || arr.get(index) == left) {
-    					index = (int) (Math.random() * arr.size());
+					while (colorArr[index]== top || colorArr[index]== left) {
+    					index = (int) (Math.random() * randRange);
     				}
 				}
 			}
 
-			this.fields[row][col] = arr.get(index); // Assign the color to the current field
-			arr.remove(index); // Remove the assigned color from the list
+			this.fields[row][col] = colorArr[index]; // Assign the color to the current field
+			filledColorMap.put(colorArr[index], filledColorMap.getOrDefault(colorArr[index], 0) + 1);
+			swap(colorArr, index, randRange - 1);
+			randRange--;
 		}
 
 		// If any balls remain in the list (shouldn't happen in a valid game state), reinitialize
-		if (arr.size() != 0) {
+		if (randRange != 0) {
 			this.init();
+		}
+	}
+
+	public HashSet<Colors> getRemainingColors(HashMap<Colors, Integer> colorsMap, Colors[] colors) {
+		HashSet<Colors> set = new HashSet<>();
+		for (Colors color: colors) {
+			if (colorsMap.getOrDefault(color, 0) < EACH) {
+				set.add(color);
+			}
+		}
+		return set;
+	}
+
+	public void swap(Colors[] colorArr, int index1, int index2) {
+		if (index1 >= 0 && index1 < colorArr.length && index2 >= 0 && index2 < colorArr.length) {
+			Colors temp = colorArr[index1];
+			colorArr[index1] = colorArr[index2];
+			colorArr[index2] = temp;
+		} else {
+			throw new IllegalArgumentException("Invalid index"); 
 		}
 	}
 	
@@ -170,7 +197,9 @@ public class Board {
 	 * @return a Map of the colors of the adjacent balls that are the same and their corresponding number.
 	 */
     public HashMap<Colors, Integer> setMove(int move) {
-		// Map to store the colors and the number of adjacent balls of the same color removed
+		// Use a HashMap to store the count of adjacent balls of the same color that are to be removed.
+		// Key: Color of the adjacent balls
+		// Value: Number of adjacent balls of the same color that are to be removed
     	HashMap<Colors, Integer> colorMap = new HashMap<>();
 
 		// Move the balls and return the index of the first EMPTY field indicating that you can move the balls in that direction
